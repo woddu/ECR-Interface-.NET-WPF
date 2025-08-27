@@ -1,0 +1,39 @@
+﻿<Window x:Class="WpfApplication1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApplication1"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        
+        Title="MainWindow" Height="500" Width="1000">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50
+                           "/>
+            <!-- Sidebar -->
+            <RowDefinition Height="*"/>
+            <!-- Content -->
+        </Grid.RowDefinitions>
+
+        <!-- Sidebar -->
+        <Grid
+            Background="#004C9A" 
+            Grid.Row="0"
+            >
+            <StackPanel 
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+            >
+                <Button x:Name="btnHome" Content="Home" Click="Home_Click" Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnHighestScores" Content="Scores" Click="HighestScores_Click" Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="btnStudents" Content="Students" Click="Students_Click" Style="{StaticResource NavButtonStyle}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Content Area -->
+        <ContentControl x:Name="MainContent" Grid.Row="1"/>
+    </Grid>
+</Window>
