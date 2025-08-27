@@ -23,7 +23,7 @@
                        Content="Name"
                        Margin="5"/>
             </StackPanel>
-            
+
         </Grid>
         <Grid Margin="10" Grid.Column="1">
             <Grid.RowDefinitions>
@@ -45,18 +45,18 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="5">
-                            <TextBlock Text="{Binding Label}"
-                                Margin="5"/>
+                        <StackPanel Orientation="Horizontal" Margin="5">
                             <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Margin="5" Width="45"/>
+                            <TextBlock Text="{Binding Label, StringFormat={}/{0}}"
+                                Margin="5"/>
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
             <!-- Second row -->
-            
+
             <ItemsControl
                 Grid.Row="1"
                 AlternationCount="1000"
@@ -71,11 +71,11 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="5">
-                            <TextBlock Text="{Binding Label}"
-                                Margin="5"/>
+                        <StackPanel Orientation="Horizontal" Margin="5">
                             <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Margin="5" Width="45"/>
+                            <TextBlock Text="{Binding Label, StringFormat={}/{0}}"
+                                Margin="5"/>
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
