@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfApplication1"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        
+        FontSize="18"
         Title="MainWindow" Height="500" Width="1000">
     <Grid>
         <Grid.RowDefinitions>
