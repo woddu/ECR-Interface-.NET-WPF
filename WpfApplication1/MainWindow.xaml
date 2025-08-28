@@ -13,7 +13,7 @@
             <RowDefinition Height="50
                            "/>
             <!-- Sidebar -->
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="450"/>
             <!-- Content -->
         </Grid.RowDefinitions>
 
@@ -34,6 +34,7 @@
         </Grid>
 
         <!-- Content Area -->
-        <ContentControl x:Name="MainContent" Grid.Row="1"/>
+        <ContentControl x:Name="MainContent" 
+                        Grid.Row="1" Margin="0,0,0,15"/>
     </Grid>
 </Window>

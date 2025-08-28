@@ -6,7 +6,9 @@
              xmlns:local="clr-namespace:WpfApplication1"
              mc:Ignorable="d" 
              FontFamily="Microsoft YaHei UI"
-             d:DesignHeight="300" d:DesignWidth="1000">
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             d:DesignHeight="435" d:DesignWidth="1000">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />

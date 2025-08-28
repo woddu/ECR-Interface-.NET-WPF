@@ -7,8 +7,9 @@
              mc:Ignorable="d" 
              
              FontFamily="Microsoft YaHei UI"
-             
-             d:DesignHeight="300" d:DesignWidth="1000">
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             d:DesignHeight="435" d:DesignWidth="1000">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400" />
@@ -29,7 +30,7 @@
                 <ListBox 
                     x:Name="listMale"
                     SelectionChanged="listMale_SelectionChanged"
-                    Height="125"     
+                    Height="160"     
                     />
                 <TextBlock
                     Text="Female"
@@ -37,7 +38,7 @@
                 <ListBox 
                     x:Name="listFemale"
                     SelectionChanged="listFemale_SelectionChanged"
-                    Height="125"     
+                    Height="160"     
                     />
                 
             </StackPanel>
