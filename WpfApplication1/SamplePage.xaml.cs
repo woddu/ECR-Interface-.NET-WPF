@@ -10,7 +10,7 @@ namespace WpfApplication1 {
   public partial class SamplePage : UserControl {
     public event EventHandler<string> AddMale;
     public event EventHandler<string> AddFemale;
-    public event EventHandler<uint> NameClicked;
+    public event EventHandler<Tuple<uint, string>> NameClicked;
 
     private System.ComponentModel.ICollectionView _collectionViewMale;
     private System.ComponentModel.ICollectionView _collectionViewFemale;
@@ -55,7 +55,7 @@ namespace WpfApplication1 {
     private void listMale_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (listMale.SelectedItem != null) {
         int rowInExcel = MaleNames.IndexOf(listMale.SelectedItem.ToString()) + 13;
-        NameClicked?.Invoke(this, (uint)rowInExcel);
+        NameClicked?.Invoke(this, Tuple.Create((uint)rowInExcel, listMale.SelectedItem.ToString()));
         listMale.SelectedIndex = -1;
       }
     }
@@ -63,7 +63,7 @@ namespace WpfApplication1 {
     private void listFemale_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (listFemale.SelectedItem != null) {
         int rowInExcel = FemaleNames.IndexOf(listFemale.SelectedItem.ToString()) + 69;
-        NameClicked?.Invoke(this, (uint)rowInExcel);
+        NameClicked?.Invoke(this, Tuple.Create((uint)rowInExcel, listFemale.SelectedItem.ToString()));
         listFemale.SelectedIndex = -1;
       }
     }
