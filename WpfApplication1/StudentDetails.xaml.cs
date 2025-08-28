@@ -21,13 +21,9 @@ namespace WpfApplication1 {
       DataContext = this;
     }
 
-    public void SetName(string name) {
+    public void SetName(string name) => lblName.Content = name;
 
-    }
-
-    public void SetExam(string exam) {
-
-    }
+    public void SetExam(string exam) => lblExam.Content = exam;
 
     public void SetGrade(string grade) {
 
