@@ -7,34 +7,46 @@
              mc:Ignorable="d" 
              
              FontFamily="Microsoft YaHei UI"
-             d:DesignHeight="450" d:DesignWidth="1000">
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             d:DesignHeight="420" d:DesignWidth="1000">
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition />
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
             <StackPanel
                 VerticalAlignment="Center"
-                HorizontalAlignment="Center">
+                HorizontalAlignment="Center"
+                Width="300">
+                
                 <Label x:Name="lblName" 
-                       Content="Name"
-                       Margin="5"/>
+                        Content="Name"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,30"/>
+
+                <Label Content="Exam"
+                        HorizontalAlignment="Center"/>
+                <Label x:Name="lblExam"
+                        Content="Exam"
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Center"/>
             </StackPanel>
 
         </Grid>
         <Grid Margin="10" Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="215" />
-                <RowDefinition Height="215" />
+                <RowDefinition Height="200" />
+                <RowDefinition Height="200" />
             </Grid.RowDefinitions>
 
             <ItemsControl
                 Grid.Row="0"
                 AlternationCount="1000"
-                Height="215"
+                Height="200"
                 ItemsSource="{Binding WrittenWorks}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -46,9 +58,12 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="5">
-                            <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Margin="5" Width="45"/>
-                            <TextBlock Text="{Binding Label, StringFormat={}/{0}}"
+                            <TextBox 
+                                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="45"/>
+                            <TextBlock 
+                                Text="{Binding Label, StringFormat={}/{0}}"
+                                Width="35"
                                 Margin="5"/>
                         </StackPanel>
                     </DataTemplate>
@@ -56,31 +71,49 @@
             </ItemsControl>
 
             <!-- Second row -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+                <ItemsControl
+                    Grid.Column="0"
+                    AlternationCount="1000"
+                    Height="200"
+                    ItemsSource="{Binding PerformanceTasks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
+                                VerticalAlignment="Top"
+                                Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="5">
+                                <TextBox 
+                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Width="45"/>
+                                <TextBlock 
+                                    Text="{Binding Label, StringFormat={}/{0}}"
+                                    Width="35"
+                                    Margin="5"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Center">
 
-            <ItemsControl
-                Grid.Row="1"
-                AlternationCount="1000"
-                Height="215"
-                ItemsSource="{Binding PerformanceTasks}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel
-                            VerticalAlignment="Top"
-                            Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="5">
-                            <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Margin="5" Width="45"/>
-                            <TextBlock Text="{Binding Label, StringFormat={}/{0}}"
-                                Margin="5"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
+                    <Button
+                        x:Name="btnSave"
+                        Content="Save"
+                        Padding="20,10"
+                        />
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
