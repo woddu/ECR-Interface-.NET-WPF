@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Windows;
 
 namespace WpfApplication1 {
@@ -22,21 +23,20 @@ namespace WpfApplication1 {
       studentsPage.AddMale += StudentsPage_AddMale;
       studentsPage.AddFemale += StudentsPage_AddFemale;
       studentsPage.NameClicked += StudentsPage_NameClicked;
-
+      
     }
 
-    private void StudentsPage_NameClicked(object sender, uint row) {
+    private void StudentsPage_NameClicked(object sender, Tuple<uint, string> tuple) {
       studentDetails.WrittenWorks.Clear();
       studentDetails.PerformanceTasks.Clear();
-      var scores = _workbookService.ReadStudentScores(row);
-
+      var scores = _workbookService.ReadStudentScores(tuple.Item1);
+      studentDetails.SetName(tuple.Item2);
       for (int i = 0; i < _workbookService.WrittenWorks.Count; i++) {
         studentDetails.WrittenWorks.Add(new FieldDefinition {
           Label = _workbookService.WrittenWorks[i],
           Value = scores.Item1[i]
         });
       }
-
 
       for (int i = 0; i < _workbookService.PerformanceTasks.Count; i++) {
         studentDetails.PerformanceTasks.Add(new FieldDefinition {
