@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:WpfApplication1"
              mc:Ignorable="d" 
              FontFamily="Microsoft YaHei UI"
@@ -34,10 +35,12 @@
             
             <Button 
                 x:Name="btnChooseFile"
-                Content="Choose an Excel File" 
-                Background="#3399FF"
-                BorderBrush="#3399FF"
-                Padding="8"
+                Content="Choose an Excel File"               
+                materialDesign:ButtonAssist.CornerRadius="25"
+                materialDesign:ButtonProgressAssist.IsIndicatorVisible="True"
+        materialDesign:ButtonProgressAssist.Value="-1"
+                Height="50"
+                Style="{StaticResource MaterialDesignRaisedDarkButton}"
                 Click="ChooseFile_Click"
                 />
         </StackPanel>

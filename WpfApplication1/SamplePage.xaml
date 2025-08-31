@@ -3,44 +3,56 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:WpfApplication1"
              mc:Ignorable="d" 
-             
              FontFamily="Microsoft YaHei UI"
-             HorizontalAlignment="Stretch"
-             VerticalAlignment="Stretch"
+             FontSize="18"
              d:DesignHeight="435" d:DesignWidth="1000">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <Grid
-            Grid.Column="0"
-            >
-            <StackPanel>
-                <Label Content="Search" />
-                <TextBox
-                    x:Name="searchBox"
-                    TextChanged="SearchBox_TextChanged"
-                    />
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" />
+                <RowDefinition Height="2*" />
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0">
+                <DockPanel Margin="0,0,0,10">
+                    <Image Source="/icons/search_26dp.png"
+                        Width="20" Height="20"
+                        Margin="4"
+                        DockPanel.Dock="Left" />
+                    <TextBox
+                        x:Name="searchBox"
+                        TextChanged="SearchBox_TextChanged"                  
+                        materialDesign:HintAssist.Hint="Search Student"
+                        AcceptsReturn="True"                 
+                        Style="{StaticResource MaterialDesignFilledTextBox}"
+                        VerticalAlignment="Center"
+                        Width="Auto" />
+                </DockPanel>
+                
                 <TextBlock
                     Text="Male"
                     />
                 <ListBox 
                     x:Name="listMale"
-                    SelectionChanged="listMale_SelectionChanged"
-                    Height="160"     
+                    SelectionChanged="listMale_SelectionChanged"                  
+                    Height="135"
                     />
+            </StackPanel>
+            <StackPanel Grid.Row="1">
                 <TextBlock
                     Text="Female"
                     />
                 <ListBox 
                     x:Name="listFemale"
-                    SelectionChanged="listFemale_SelectionChanged"
-                    Height="160"     
+                    SelectionChanged="listFemale_SelectionChanged"                        
+                    Height="135"
                     />
-                
             </StackPanel>
         </Grid>
         <Grid
@@ -54,6 +66,9 @@
                 <Label Content="Name" VerticalAlignment="Center" HorizontalAlignment="Left"  />
                 <TextBox
                     x:Name="txtName"
+                    materialDesign:HintAssist.Hint="Name"
+                    AcceptsReturn="True"                 
+                    Style="{StaticResource MaterialDesignFilledTextBox}"
                     Margin="0,0,0,10"/>
                 <Label Content="Male"/>
                 <CheckBox
