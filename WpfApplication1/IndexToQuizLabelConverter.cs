@@ -5,8 +5,7 @@ using System.Windows.Data;
 namespace WpfApplication1 {
   class IndexToQuizLabelConverter : IValueConverter {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-      if (value is int) {
-        int index = (int)value;
+      if (value is int index) {
         return $"Quiz #{index + 1}";
       }
       return "";
