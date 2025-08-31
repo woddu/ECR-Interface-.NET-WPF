@@ -23,6 +23,7 @@ public class WorkbookService : IDisposable {
   public List<string> PerformanceTasks { get; private set; } = new List<string>();
 
   public string MissingSheets { get; set; }
+
   public string Exam { get; private set; }
 
   public bool HasFileLoaded => !string.IsNullOrWhiteSpace(FilePath);
@@ -48,17 +49,18 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  
+
 
   public void LoadWorkbook(string path) {
     FilePath = path;
   }
 
-  public Tuple<List<string>, List<string>> ReadAllNames() {
+  public (List<string>maleNames, List<string> femaleNames) ReadAllNames() {
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, false)) {
       var maleNames = ReadNames(doc, true);
       var femaleNames = ReadNames(doc, false);
-      return System.Tuple.Create(maleNames, femaleNames);
+      ReadHighestPossibleScores(doc);
+      return (maleNames, femaleNames);
     }
   }
 
@@ -195,72 +197,68 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  public void ReadHighestPossibleScores(
-      bool sem1 = true
-  ) {
+  public void ReadHighestPossibleScores(SpreadsheetDocument doc, bool sem1 = true) {
     uint fixedRow = 11u;
+    WorkbookPart wbPart = doc.WorkbookPart;
+    Sheet sheet = wbPart.Workbook.Sheets
+        .OfType<Sheet>()
+        .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
 
-    using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, false)) {
-      WorkbookPart wbPart = doc.WorkbookPart;
-      Sheet sheet = wbPart.Workbook.Sheets
-          .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+    if (sheet == null) return;
 
-      if (sheet == null) return;
+    WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
+    SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
 
-      WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
-      SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
-
-      int startIdx, endIdx;
-      string[,] Cols = {
+    int startIdx, endIdx;
+    string[,] Cols = {
                 { "F", "O" },
                 { "S", "AB" }
             };
-      Cell cell;
-      string val;
+    Cell cell;
+    string val;
 
-      for (int i = 0; i < 2; i++) {
-        startIdx = ColNameToNumber(Cols[i, 0]);
-        endIdx = ColNameToNumber(Cols[i, 1]);
+    for (int i = 0; i < 2; i++) {
+      startIdx = ColNameToNumber(Cols[i, 0]);
+      endIdx = ColNameToNumber(Cols[i, 1]);
 
-        for (int colIdx = startIdx; colIdx <= endIdx; colIdx++) {
-          string colName = ColNumberToName(colIdx);
-          string cellRef = $"{colName}{fixedRow}";
+      for (int colIdx = startIdx; colIdx <= endIdx; colIdx++) {
+        string colName = ColNumberToName(colIdx);
+        string cellRef = $"{colName}{fixedRow}";
 
-          cell = sheetData.Descendants<Cell>()
-                               .FirstOrDefault(c => c.CellReference == cellRef);
+        cell = sheetData.Descendants<Cell>()
+                             .FirstOrDefault(c => c.CellReference == cellRef);
 
-          val = GetCellValue(doc, cell); // ← your existing helper
-          if (!string.IsNullOrWhiteSpace(val)) {
-            if (i == 0) {
-              WrittenWorks.Add(val);
-            } else if (i == 1) {
-              PerformanceTasks.Add(val);
-            }
+        val = GetCellValue(doc, cell); // ← your existing helper
+        //if (!string.IsNullOrWhiteSpace(val)) {
+          if (i == 0) {
+            WrittenWorks.Add(val);
+          } else if (i == 1) {
+            PerformanceTasks.Add(val);
           }
-        }
+        //}
       }
-
-      cell = sheetData.Descendants<Cell>()
-                               .FirstOrDefault(c => c.CellReference == "AF11");
-      Exam = GetCellValue(doc, cell);
-
-      cell = sheetData.Descendants<Cell>()
-                               .FirstOrDefault(c => c.CellReference == "R11");
-      WeightedScores.Add(GetCellValue(doc, cell));
-
-      cell = sheetData.Descendants<Cell>()
-                               .FirstOrDefault(c => c.CellReference == "AE11");
-      WeightedScores.Add(GetCellValue(doc, cell));
-
-      cell = sheetData.Descendants<Cell>()
-                               .FirstOrDefault(c => c.CellReference == "AH11");
-      WeightedScores.Add(GetCellValue(doc, cell));
-
     }
+
+    cell = sheetData.Descendants<Cell>()
+                             .FirstOrDefault(c => c.CellReference == "AF11");
+    Exam = GetCellValue(doc, cell);
+
+    cell = sheetData.Descendants<Cell>()
+                             .FirstOrDefault(c => c.CellReference == "R11");
+    WeightedScores.Add(GetCellValue(doc, cell));
+
+    cell = sheetData.Descendants<Cell>()
+                             .FirstOrDefault(c => c.CellReference == "AE11");
+    WeightedScores.Add(GetCellValue(doc, cell));
+
+    cell = sheetData.Descendants<Cell>()
+                             .FirstOrDefault(c => c.CellReference == "AH11");
+    WeightedScores.Add(GetCellValue(doc, cell));
+
+
   }
 
-  public Tuple<List<string>, List<string>> ReadStudentScores(
+  public (List<string> writtenWorks, List<string> performanceTasks) ReadStudentScores(
     uint row,
     bool sem1 = true
   ) {
@@ -274,7 +272,7 @@ public class WorkbookService : IDisposable {
           .OfType<Sheet>()
           .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
 
-      if (sheet == null) return System.Tuple.Create(values1, values2);
+      if (sheet == null) return (values1, values2);
 
       WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
       SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
@@ -298,17 +296,17 @@ public class WorkbookService : IDisposable {
           cell = sheetData.Descendants<Cell>()
                                .FirstOrDefault(c => c.CellReference == cellRef);
 
-          val = GetCellValue(doc, cell); 
+          val = GetCellValue(doc, cell);
           if (i == 0) {
             values1.Add(val);
           } else {
             values2.Add(val);
           }
-          
+
         }
       }
 
-      return System.Tuple.Create(values1, values2);
+      return (values1, values2);
     }
   }
 
