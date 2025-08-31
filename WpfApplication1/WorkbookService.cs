@@ -22,6 +22,7 @@ public class WorkbookService : IDisposable {
 
   public List<string> PerformanceTasks { get; private set; } = new List<string>();
 
+  public string MissingSheets { get; set; }
   public string Exam { get; private set; }
 
   public bool HasFileLoaded => !string.IsNullOrWhiteSpace(FilePath);
@@ -35,27 +36,19 @@ public class WorkbookService : IDisposable {
           .Select(s => s.Name)
           .ToList();
 
-      // Check if all required sheets are present
-      return requiredSheetNames.All(req => sheetNames.Contains(req));
-    }
-  }
-
-  public string GetMissingSheets() {
-    using (var doc = SpreadsheetDocument.Open(FilePath, false)) {
-      var wbPart = doc.WorkbookPart;
-      var sheetNames = wbPart.Workbook.Sheets
-          .OfType<Sheet>()
-          .Select(s => s.Name)
-          .ToList();
-
-      return string.Join(
+      MissingSheets = string.Join(
           ", ",
           requiredSheetNames
           .Where(req => !sheetNames.Contains(req))
           .ToList()
       );
+
+      // Check if all required sheets are present
+      return requiredSheetNames.All(req => sheetNames.Contains(req));
     }
   }
+
+  
 
   public void LoadWorkbook(string path) {
     FilePath = path;
