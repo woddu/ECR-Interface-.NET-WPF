@@ -8,7 +8,8 @@
         mc:Ignorable="d"
         Style="{StaticResource MaterialDesignWindow}"
         WindowStartupLocation="CenterScreen"
-        FontSize="18"
+        FontSize="14"
+        FontFamily="Microsoft YaHei UI"
         Title="MainWindow" Height="500" Width="1000">
     <Grid>
         <Grid.RowDefinitions>

@@ -3,12 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+            xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:WpfApplication1"
-             mc:Ignorable="d" 
-             FontFamily="Microsoft YaHei UI"
-             HorizontalAlignment="Stretch"
-             VerticalAlignment="Stretch"
+             mc:Ignorable="d"
              d:DesignHeight="435" d:DesignWidth="1000">
     <Grid>
         <Grid.RowDefinitions>
@@ -19,30 +16,28 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             >
-                <Label 
-                    x:Name="FileName" 
-                    Content="" 
-                    FontFamily="Microsoft YaHei UI" 
-                    FontSize="30" 
-                    FontWeight="Bold" />
+                <TextBlock 
+                    x:Name="FileName"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"/>
         </StackPanel>
-        
+
         <StackPanel
             Grid.Row="1"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            >
-            
+            VerticalAlignment="Center">
             <Button 
                 x:Name="btnChooseFile"
-                Content="Choose an Excel File"               
                 materialDesign:ButtonAssist.CornerRadius="25"
                 materialDesign:ButtonProgressAssist.IsIndicatorVisible="True"
-        materialDesign:ButtonProgressAssist.Value="-1"
+                materialDesign:ButtonProgressAssist.Value="-1"
                 Height="50"
                 Style="{StaticResource MaterialDesignRaisedDarkButton}"
-                Click="ChooseFile_Click"
-                />
+                Click="ChooseFile_Click">
+                <TextBlock Text="Choose an Excel File" 
+                    VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignLabelLargeTextBlock}"/>
+            </Button>
         </StackPanel>
             
     </Grid>
