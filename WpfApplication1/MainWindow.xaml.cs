@@ -30,23 +30,31 @@ namespace WpfApplication1 {
       
     }
 
-    private void StudentsPage_NameClicked(object sender, Tuple<uint, string> tuple) {
+    private void StudentsPage_NameClicked(object sender, (uint row, string name) tuple) {
+      studentDetails.OriginalWrittenWork.Clear();
+      studentDetails.OriginalPerformanceTask.Clear();
       studentDetails.WrittenWorks.Clear();
       studentDetails.PerformanceTasks.Clear();
-      var scores = _workbookService.ReadStudentScores(tuple.Item1);
-      studentDetails.SetName(tuple.Item2);
+      var (writtenWorks, performanceTasks) = _workbookService.ReadStudentScores(tuple.row);
+      studentDetails.SetName(tuple.name);
       for (int i = 0; i < _workbookService.WrittenWorks.Count; i++) {
-        studentDetails.WrittenWorks.Add(new FieldDefinition {
-          Label = _workbookService.WrittenWorks[i],
-          Value = scores.Item1[i]
-        });
+        if (writtenWorks[i] != "") {
+          studentDetails.WrittenWorks.Add(new FieldDefinition {
+            Label = _workbookService.WrittenWorks[i],
+            Value = writtenWorks[i]
+          });
+          studentDetails.OriginalWrittenWork.Add(writtenWorks[i]);
+        }
       }
 
       for (int i = 0; i < _workbookService.PerformanceTasks.Count; i++) {
-        studentDetails.PerformanceTasks.Add(new FieldDefinition {
-          Label = _workbookService.PerformanceTasks[i],
-          Value = scores.Item2[i]
-        });
+        if (performanceTasks[i] != "") {
+          studentDetails.PerformanceTasks.Add(new FieldDefinition {
+            Label = _workbookService.PerformanceTasks[i],
+            Value = performanceTasks[i]
+          });
+          studentDetails.OriginalPerformanceTask.Add(performanceTasks[i]);
+        }
       }
 
       MainContent.Content = studentDetails;
@@ -70,8 +78,7 @@ namespace WpfApplication1 {
       homePage.SetLoading(true);
 
       // Step 2: Run heavy work in background and return a WorkbookResult
-      (bool isValid, string fileName, List<string> maleNames, List<string> femaleNames) = await Task.Run(() =>
-      {
+      (bool isValid, string fileName, List<string> maleNames, List<string> femaleNames) = await Task.Run(() => {
         _workbookService.LoadWorkbook(file[0]);
 
         if (!_workbookService.IsFileECR()) {
@@ -83,13 +90,13 @@ namespace WpfApplication1 {
           );
         }
 
-        var names = _workbookService.ReadAllNames();
+        var (maleNames, femaleNames) = _workbookService.ReadAllNames();
 
         return (
           true,
           file[1],
-          names.Item1?.ToList(),
-          names.Item2?.ToList()
+          maleNames?.ToList(),
+          femaleNames?.ToList()
         );
       });
 
@@ -113,6 +120,8 @@ namespace WpfApplication1 {
 
       highestScoresPage.PerformanceTasks.Clear();
       _workbookService.PerformanceTasks.ForEach(score => highestScoresPage.PerformanceTasks.Add(score));
+
+      highestScoresPage.SetExam(_workbookService.Exam);
 
       rbtnScores.IsEnabled = rbtnStudents.IsEnabled = true;
       rbtnFile.IsChecked = false;
