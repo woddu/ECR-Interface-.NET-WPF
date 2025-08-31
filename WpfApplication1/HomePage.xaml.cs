@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Windows;
@@ -16,10 +17,8 @@ namespace WpfApplication1
 
         public HomePage()
         {
-            InitializeComponent();
-
-
-        }
+          InitializeComponent();
+    }
 
         private void ChooseFile_Click(object sender, RoutedEventArgs e)
         {
@@ -55,5 +54,10 @@ namespace WpfApplication1
             FileName.Content = fileName;
             btnChooseFile.Content = "Choose a Different File";
         }
+
+    public void SetLoading(bool isLoading) {
+      ButtonProgressAssist.SetIsIndeterminate(btnChooseFile, isLoading);
     }
+    
+  }
 }
