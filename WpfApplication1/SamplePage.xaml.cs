@@ -1,7 +1,10 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace WpfApplication1 {
   /// <summary>
@@ -10,10 +13,11 @@ namespace WpfApplication1 {
   public partial class SamplePage : UserControl {
     public event EventHandler<string> AddMale;
     public event EventHandler<string> AddFemale;
-    public event EventHandler<Tuple<uint, string>> NameClicked;
+    public event EventHandler<(uint row, string name)> NameClicked;
 
     private System.ComponentModel.ICollectionView _collectionViewMale;
     private System.ComponentModel.ICollectionView _collectionViewFemale;
+    private bool genderIsMale = true;
 
     public ObservableCollection<string> MaleNames { get; set; } = new ObservableCollection<string>();
     public ObservableCollection<string> FemaleNames { get; set; } = new ObservableCollection<string>();
@@ -26,6 +30,10 @@ namespace WpfApplication1 {
       _collectionViewFemale = System.Windows.Data.CollectionViewSource.GetDefaultView(FemaleNames);
       listMale.ItemsSource = _collectionViewMale;
       listFemale.ItemsSource = _collectionViewFemale;
+    }
+
+    private void LettersOnlyTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
+      e.Handled = !e.Text.All(c => char.IsLetter(c) || c == ',' || c == ' ' || c == '.');
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) {
@@ -44,8 +52,17 @@ namespace WpfApplication1 {
       _collectionViewFemale.Refresh();
     }
 
+    private void Gender_Checked(object sender, RoutedEventArgs e) {
+      if (sender is not RadioButton rb) return;
+      if (rb.Name == rbMale.Name) {
+        genderIsMale = true;
+      } else if (rb.Name == rbFemale.Name) {
+        genderIsMale = false;
+      }
+    }
+
     private void AddName_Click(object sender, RoutedEventArgs e) {
-      if (chkMale.IsChecked == true) {
+      if (genderIsMale) {
         AddMale?.Invoke(this, txtName.Text);
       } else {
         AddFemale?.Invoke(this, txtName.Text);
@@ -55,7 +72,7 @@ namespace WpfApplication1 {
     private void listMale_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (listMale.SelectedItem != null) {
         int rowInExcel = MaleNames.IndexOf(listMale.SelectedItem.ToString()) + 13;
-        NameClicked?.Invoke(this, Tuple.Create((uint)rowInExcel, listMale.SelectedItem.ToString()));
+        NameClicked?.Invoke(this, ((uint)rowInExcel, listMale.SelectedItem.ToString()));
         listMale.SelectedIndex = -1;
       }
     }
@@ -63,7 +80,7 @@ namespace WpfApplication1 {
     private void listFemale_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (listFemale.SelectedItem != null) {
         int rowInExcel = FemaleNames.IndexOf(listFemale.SelectedItem.ToString()) + 69;
-        NameClicked?.Invoke(this, Tuple.Create((uint)rowInExcel, listFemale.SelectedItem.ToString()));
+        NameClicked?.Invoke(this, ((uint)rowInExcel, listFemale.SelectedItem.ToString()));
         listFemale.SelectedIndex = -1;
       }
     }
