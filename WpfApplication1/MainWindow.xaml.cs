@@ -1,25 +1,29 @@
 ﻿
+using MaterialDesignThemes.Wpf;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace WpfApplication1 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml
   /// </summary>
   public partial class MainWindow : Window {
+
     private WorkbookService _workbookService = new WorkbookService();
 
     private HomePage homePage = new HomePage();
     private SamplePage studentsPage = new SamplePage();
-    private HighestScores highestScores = new HighestScores();
+    private HighestScores highestScoresPage = new HighestScores();
     private StudentDetails studentDetails = new StudentDetails();
 
     public MainWindow() {
       InitializeComponent();
       MainContent.Content = homePage;
       homePage.FileChosen += HomePage_FileChosen;
-      btnHighestScores.IsEnabled = btnStudents.IsEnabled = false;
       studentsPage.AddMale += StudentsPage_AddMale;
       studentsPage.AddFemale += StudentsPage_AddFemale;
       studentsPage.NameClicked += StudentsPage_NameClicked;
@@ -48,51 +52,77 @@ namespace WpfApplication1 {
       MainContent.Content = studentDetails;
     }
 
-    private void Home_Click(object sender, RoutedEventArgs e) {
-      //btnHome.Background = (System.Windows.Media.SolidColorBrush)new System.Windows.Media.BrushConverter()
-      //                     .ConvertFromString("#005BB5");
-      //btnSample.Background = (System.Windows.Media.SolidColorBrush)new System.Windows.Media.BrushConverter()
-      //                     .ConvertFromString("#FF004C9A");
-      //btnHome.Padding = new Thickness(15, 10, 20, 10);
-      //btnHome.BorderThickness = new Thickness(5, 0, 0, 0);
-      MainContent.Content = homePage;
+    private void Tab_Checked(object sender, RoutedEventArgs e) {
+      if (MainContent == null) return;
+      if (sender is not RadioButton rb) return;
+
+      if (rb.Name == rbtnFile.Name) {
+        MainContent.Content = homePage;
+      } else if (rb.Name == rbtnStudents.Name) {
+        MainContent.Content = studentsPage;
+      } else if (rb.Name == rbtnScores.Name) {
+        MainContent.Content = highestScoresPage;
+      }
+
     }
 
-    
-    private void HighestScores_Click(object sender, RoutedEventArgs e) {
-      MainContent.Content = highestScores;
-    }
+    private async void HomePage_FileChosen(object sender, string[] file) {
+      homePage.SetLoading(true);
 
-    private void Students_Click(object sender, RoutedEventArgs e) {
-      //btnHome.Background = (System.Windows.Media.SolidColorBrush)new System.Windows.Media.BrushConverter()
-      //                     .ConvertFromString("#FF004C9A");
-      //btnSample.Background = (System.Windows.Media.SolidColorBrush)new System.Windows.Media.BrushConverter()
-      //                     .ConvertFromString("#005BB5");
-      //btnSample.Padding = new Thickness(15, 10, 20, 10);
-      //btnSample.BorderThickness = new Thickness(5, 0, 0, 0);
-      MainContent.Content = studentsPage;
-    }
+      // Step 2: Run heavy work in background and return a WorkbookResult
+      (bool isValid, string fileName, List<string> maleNames, List<string> femaleNames) = await Task.Run(() =>
+      {
+        _workbookService.LoadWorkbook(file[0]);
 
-    private void HomePage_FileChosen(object sender, string[] file) {
-      _workbookService.LoadWorkbook(file[0]);
-      if (!_workbookService.IsFileECR()) {
-        homePage.ShowError("Missing Sheets", "Missing Sheets: " + _workbookService.GetMissingSheets());
+        if (!_workbookService.IsFileECR()) {
+          return ( 
+            false,
+            "",
+            [],
+            []
+          );
+        }
+
+        var names = _workbookService.ReadAllNames();
+
+        return (
+          true,
+          file[1],
+          names.Item1?.ToList(),
+          names.Item2?.ToList()
+        );
+      });
+
+      // Step 3: Back on UI thread — safe to update UI
+      if (!isValid) {
+        homePage.ShowError("Missing Sheets", "Missing Sheets: " + _workbookService.MissingSheets);
+        homePage.SetLoading(false);
         return;
       }
-      homePage.SetFileName(file[1]);
-      var names = _workbookService.ReadAllNames();
-      names.Item1.ForEach(name => studentsPage.MaleNames.Add(name));
-      names.Item2.ForEach(name => studentsPage.FemaleNames.Add(name));
-      Application.Current.Dispatcher.BeginInvoke(new Action(() => {
-        _workbookService.ReadHighestPossibleScores();
-        _workbookService.WrittenWorks.ForEach(score => highestScores.WrittenWorks.Add(score));
-        _workbookService.PerformanceTasks.ForEach(score => highestScores.PerformanceTasks.Add(score));
 
-      }));
+      homePage.SetFileName(fileName);
+
+      studentsPage.MaleNames.Clear();
+      maleNames.ForEach(name => studentsPage.MaleNames.Add(name));
+
+      studentsPage.FemaleNames.Clear();
+      femaleNames.ForEach(name => studentsPage.FemaleNames.Add(name));
+
+      highestScoresPage.WrittenWorks.Clear();
+      _workbookService.WrittenWorks.ForEach(score => highestScoresPage.WrittenWorks.Add(score));
+
+      highestScoresPage.PerformanceTasks.Clear();
+      _workbookService.PerformanceTasks.ForEach(score => highestScoresPage.PerformanceTasks.Add(score));
+
+      rbtnScores.IsEnabled = rbtnStudents.IsEnabled = true;
+      rbtnFile.IsChecked = false;
+      rbtnStudents.IsChecked = true;
+
+      homePage.SetLoading(false);
       MainContent.Content = studentsPage;
-      this.Title = file[1];
-      btnStudents.IsEnabled = btnHighestScores.IsEnabled = true;
+      this.Title = fileName;
     }
+
 
     private void StudentsPage_AddMale(object sender, string newName) {
       studentsPage.EnableAddButton(false);
