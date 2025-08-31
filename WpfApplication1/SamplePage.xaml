@@ -3,13 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:WpfApplication1"
              mc:Ignorable="d" 
+             FontFamily="Microsoft YaHei UI"
+             FontSize="18"
              d:DesignHeight="435" d:DesignWidth="1000">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition Width="400" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
@@ -30,13 +32,12 @@
                         AcceptsReturn="True"                 
                         Style="{StaticResource MaterialDesignFilledTextBox}"
                         VerticalAlignment="Center"
-                        Width="Auto" 
-                        PreviewTextInput="LettersOnlyTextBox_PreviewTextInput"/>
+                        Width="Auto" />
                 </DockPanel>
                 
-                <TextBlock Text="Male"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource MaterialDesignTitleMediumTextBlock}"/>
+                <TextBlock
+                    Text="Male"
+                    />
                 <ListBox 
                     x:Name="listMale"
                     SelectionChanged="listMale_SelectionChanged"                  
@@ -44,9 +45,9 @@
                     />
             </StackPanel>
             <StackPanel Grid.Row="1">
-                <TextBlock Text="Female"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource MaterialDesignTitleMediumTextBlock}"/>
+                <TextBlock
+                    Text="Female"
+                    />
                 <ListBox 
                     x:Name="listFemale"
                     SelectionChanged="listFemale_SelectionChanged"                        
@@ -62,36 +63,17 @@
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"
                 Width="200">
-                <TextBlock 
-                    Text="Add Student" 
-                    VerticalAlignment="Center" 
-                    HorizontalAlignment="Left"
-                    Padding="0,16"
-                    Style="{StaticResource MaterialDesignTitleLargeTextBlock}"/>
+                <Label Content="Name" VerticalAlignment="Center" HorizontalAlignment="Left"  />
                 <TextBox
                     x:Name="txtName"
                     materialDesign:HintAssist.Hint="Name"
                     AcceptsReturn="True"                 
                     Style="{StaticResource MaterialDesignFilledTextBox}"
-                    Margin="0,0,0,10"
-                    PreviewTextInput="LettersOnlyTextBox_PreviewTextInput"/>
-                <StackPanel Orientation="Horizontal"
-                        Margin="0,0,0,20">
-                    <RadioButton
-                        x:Name="rbMale"
-                        Content="Male"
-                        Style="{StaticResource MaterialDesignRadioButton}"
-                        Tag="True"
-                        IsChecked="True"
-                        Margin="0,0,20,0"
-                        Checked="Gender_Checked"/>
-                    <RadioButton
-                        x:Name="rbFemale"
-                        Content="Female"
-                        Style="{StaticResource MaterialDesignRadioButton}"
-                        Tag="True"
-                        Checked="Gender_Checked"/>
-                </StackPanel>
+                    Margin="0,0,0,10"/>
+                <Label Content="Male"/>
+                <CheckBox
+                    x:Name="chkMale"
+                    Margin="0,0,0,20"/>
                 <Button 
                     x:Name="btnAdd"
                     Content="Add" 

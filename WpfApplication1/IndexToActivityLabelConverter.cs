@@ -6,7 +6,7 @@ namespace WpfApplication1 {
   class IndexToActivityLabelConverter : IValueConverter {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
       if (value is int index) {
-        return $"#{index + 1}";
+        return $"Activity #{index + 1}";
       }
       return "";
     }
