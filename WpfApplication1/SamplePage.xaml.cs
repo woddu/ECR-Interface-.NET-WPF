@@ -62,10 +62,12 @@ namespace WpfApplication1 {
     }
 
     private void AddName_Click(object sender, RoutedEventArgs e) {
+      if(string.IsNullOrWhiteSpace(txtName.Text)) return;
+
       if (genderIsMale) {
-        AddMale?.Invoke(this, txtName.Text);
+        AddMale?.Invoke(this, txtName.Text.ToUpper());
       } else {
-        AddFemale?.Invoke(this, txtName.Text);
+        AddFemale?.Invoke(this, txtName.Text.ToUpper());
       }
     }
 
