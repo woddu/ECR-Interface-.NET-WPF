@@ -3,13 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:WpfApplication1"
+             xmlns:conv="clr-namespace:WpfApplication1"
              mc:Ignorable="d" 
              
              FontFamily="Microsoft YaHei UI"
              d:DesignHeight="435" d:DesignWidth="1000">
-
+    <UserControl.Resources>
+        <conv:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.2*"/>
@@ -19,22 +22,74 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         <Grid Grid.Column="0">
             <StackPanel
                 VerticalAlignment="Center"
-                HorizontalAlignment="Center">
+                Margin="25,0">
                 
-                <Label x:Name="lblName" 
-                        Content="Name"
-                        HorizontalAlignment="Center"
+                <TextBlock x:Name="tbName" 
+                        Text="Name"
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Left"
+                        Style="{StaticResource MaterialDesignTitleLargeTextBlock}"
+                        TextWrapping="Wrap"
                         Margin="0,0,0,30"/>
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,0,0,30">
+                    <TextBlock
+                        Text="Grade: "
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Left"
+                        Style="{StaticResource MaterialDesignTitleLargeTextBlock}"
+                        TextWrapping="Wrap"/>
+                    <TextBlock x:Name="tbExam"
+                        Text=""
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Left"
+                        Style="{StaticResource MaterialDesignTitleLargeTextBlock}"
+                        TextWrapping="Wrap"/>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Left"
+                    Margin="0,0,0,30">
+                    <TextBlock
+                        Text="Exam"
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Left"
+                        Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                        TextWrapping="Wrap"/>
+                    <TextBox
+                        x:Name="txtExam"
+                        VerticalAlignment="Top"
+                        materialDesign:HintAssist.Hint="Score"
+                        AcceptsReturn="True"                 
+                        Style="{StaticResource MaterialDesignFilledTextBox}"
+                        TextWrapping="Wrap"
+                        Width="70"
+                        PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                        MaxLength="2"
+                        materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
+                        TextChanged="ExamTextChanged"/>
+                </StackPanel>
+                <DockPanel
+                    LastChildFill="False"
+                    >
+                    <Button x:Name="btnSaveExam" 
+                        Content="Save"
+                        IsEnabled="False"
+                        Width="85"
+                        Click="SaveExam_Click"
+                        DockPanel.Dock="Left"/>
 
-                <Label Content="Exam"
-                        HorizontalAlignment="Center"/>
-                <Label x:Name="lblExam"
-                        Content="Exam"
-                        Margin="0,0,0,5"
-                        HorizontalAlignment="Center"/>
+                    <Button x:Name="btnDeleteStudent" 
+                        Content="Delete"
+                        Width="85"
+                        Click="DeleteStudent_Click"
+                        Background="#BA1A1A"
+                        BorderBrush="#BA1A1A"
+                        ToolTip="Delete Student" 
+                        DockPanel.Dock="Right"/>
+                </DockPanel>
             </StackPanel>
 
         </Grid>
+        
         <Grid Margin="10" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -43,49 +98,14 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3.5*" />
                     <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="3.5*" />
                 </Grid.ColumnDefinitions>
-                <ItemsControl
-                    Grid.Column="0"
-                    AlternationCount="1000"
-                    ItemsSource="{Binding WrittenWorks}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="2" Columns="5"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" 
-                                    VerticalAlignment="Center"
-                                    Margin="2">
-                            <TextBox 
-                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
-                                    Path=(ItemsControl.AlternationIndex)}"
-                                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                VerticalAlignment="Top"
-                                materialDesign:HintAssist.Hint="Score"
-                                AcceptsReturn="True"                 
-                                Style="{StaticResource MaterialDesignFilledTextBox}"
-                                TextWrapping="Wrap"
-                                Width="60"
-                                PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
-                                MaxLength="2"
-                                materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
-                                TextChanged="WrittenScoresTextChanged"/>
-                            <TextBlock 
-                                Text="{Binding Label, StringFormat={}/{0}}"
-                                VerticalAlignment="Center"
-                                Width="35"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
                 <DockPanel
-                    Grid.Column="1"
+                    Grid.Column="0"
                     HorizontalAlignment="Center"
-                    LastChildFill="False">
+                    LastChildFill="False"
+                    Margin="0,0,0,10">
                     <TextBlock 
                         Text="Written Works" 
                         VerticalAlignment="Center" 
@@ -100,20 +120,13 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                         Content="Save"
                         DockPanel.Dock="Bottom"
                         Width="85"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                        Click="SaveWrittenWorks_Click"/>
             </DockPanel>
-        </Grid>
-
-        <!-- Second row -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3.5*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
                 <ItemsControl
-                    Grid.Column="0"
+                    Grid.Column="1"
                     AlternationCount="1000"
-                    ItemsSource="{Binding PerformanceTasks}">
+                    ItemsSource="{Binding WrittenWorks}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Rows="2" Columns="5"/>
@@ -121,9 +134,15 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal"
+                            <StackPanel Orientation="Horizontal" 
                                         VerticalAlignment="Center"
                                         Margin="2">
+                                <StackPanel.Visibility>
+                                    <MultiBinding Converter="{StaticResource EmptyToVisibilityConverter}">
+                                        <Binding Path="Value"/>
+                                        <Binding Path="Label"/>
+                                    </MultiBinding>
+                                </StackPanel.Visibility>
                                 <TextBox 
                                     Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                                         Path=(ItemsControl.AlternationIndex)}"
@@ -131,23 +150,40 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                                     VerticalAlignment="Top"
                                     materialDesign:HintAssist.Hint="Score"
                                     AcceptsReturn="True"                 
-                                    Style="{StaticResource MaterialDesignFilledTextBox}"
+                                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                     TextWrapping="Wrap"
-                                    Width="60"
+                                    Width="45"
                                     PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
                                     MaxLength="2"
                                     materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
-                                    TextChanged="PerformanceScoresTextChanged"/>
+                                    TextChanged="WrittenScoresTextChanged"/>
                                 <TextBlock 
-                                    Text="{Binding Label, StringFormat={}/{0}}"
-                                    VerticalAlignment="Center"
-                                    Width="35"/>
+                                    Text="{Binding Label, StringFormat={}/ {0}}"
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Left"
+                                    Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                                    TextWrapping="Wrap"
+                                    FontWeight="SemiBold"
+                                    Margin="1,5,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+        </Grid>
+
+        <!-- Second row -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="3.5*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Row="1"
+                    Grid.Column="0"
+                    BorderBrush="LightGray"
+                    BorderThickness="0,1,0,0" />
                 <DockPanel
-                    Grid.Column="1"
+                    Grid.Column="0"
                     HorizontalAlignment="Center"
                     LastChildFill="False">
                     <TextBlock 
@@ -164,8 +200,57 @@ xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                         Content="Save"
                         DockPanel.Dock="Bottom"
                         Width="85"
-                        IsEnabled="False"/>
+                        IsEnabled="False"
+                        Click="SavePerformanceTasks_Click"/>
                 </DockPanel>
+                <ItemsControl
+                    Grid.Column="1"
+                    AlternationCount="1000"                    
+                    BorderBrush="LightGray"
+                    BorderThickness="0,1,0,0"
+                    ItemsSource="{Binding PerformanceTasks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="2" Columns="5"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Margin="2">
+                                <StackPanel.Visibility>
+                                    <MultiBinding Converter="{StaticResource EmptyToVisibilityConverter}">
+                                        <Binding Path="Value"/>
+                                        <Binding Path="Label"/>
+                                    </MultiBinding>
+                                </StackPanel.Visibility>
+                                <TextBox 
+                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                        Path=(ItemsControl.AlternationIndex)}"
+                                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    VerticalAlignment="Top"
+                                    materialDesign:HintAssist.Hint="Score"
+                                    AcceptsReturn="True"                 
+                                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                    TextWrapping="Wrap"
+                                    Width="45"
+                                    PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                    MaxLength="2"
+                                    materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
+                                    TextChanged="PerformanceScoresTextChanged"/>
+                                <TextBlock 
+                                    Text="{Binding Label, StringFormat={}/ {0}}"
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Left"
+                                    Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                                    TextWrapping="Wrap"
+                                    FontWeight="SemiBold"
+                                    Margin="1,5,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Grid>
     </Grid>

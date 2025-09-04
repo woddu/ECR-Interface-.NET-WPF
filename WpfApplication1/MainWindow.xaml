@@ -55,7 +55,8 @@
                     Style="{StaticResource MaterialDesignTabRadioButton}" 
                     FontSize="18"
                     Cursor="Hand"
-                    Foreground="White"/>
+                    Foreground="White"
+                    Click="StudentsPage_CLiked"/>
             </StackPanel>
         </Grid>
 

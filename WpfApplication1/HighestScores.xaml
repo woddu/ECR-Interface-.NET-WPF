@@ -28,6 +28,7 @@
             </Grid.ColumnDefinitions>
             <!-- First row -->
             <ItemsControl
+                x:Name="itemsControlWrittenWorks"
                 Grid.Row="0"
                 Grid.Column="1"
                 AlternationCount="1000"
@@ -98,11 +99,13 @@
                 <Button x:Name="btnSaveWrittenWorks" 
                         Content="Save"
                         IsEnabled="False"
-                        Width="85"/>
+                        Width="85"
+                        Click="SaveWrittenWorks_Click"/>
             </StackPanel>
             
             <!-- Second row -->
             <ItemsControl
+                x:Name="itemsControlPerformanceTasks"
                 Grid.Row="1"
                 Grid.Column="1"
                 AlternationCount="1000"
@@ -179,7 +182,8 @@
                 <Button x:Name="btnSavePerformanceTasks" 
                         Content="Save"
                         IsEnabled="False"
-                        Width="85"/>
+                        Width="85"
+                        Click="SavePerformanceTasks_Click"/>
             </StackPanel>
 
         </Grid>
@@ -209,7 +213,8 @@
             <Button x:Name="btnSaveExam" 
                 Content="Save"
                 IsEnabled="False"
-                Width="85"/>
+                Width="85"
+                Click="SaveExam_Click"/>
         </StackPanel>
     </Grid>
 </UserControl>

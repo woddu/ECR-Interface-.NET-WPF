@@ -35,8 +35,9 @@
                 </DockPanel>
                 
                 <TextBlock Text="Male"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource MaterialDesignTitleMediumTextBlock}"/>
+                            VerticalAlignment="Center"
+                            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                            Margin="10,0"/>
                 <ListBox 
                     x:Name="listMale"
                     SelectionChanged="listMale_SelectionChanged"                  
@@ -45,8 +46,9 @@
             </StackPanel>
             <StackPanel Grid.Row="1">
                 <TextBlock Text="Female"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource MaterialDesignTitleMediumTextBlock}"/>
+                            VerticalAlignment="Center"
+                            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                            Margin="10,0"/>
                 <ListBox 
                     x:Name="listFemale"
                     SelectionChanged="listFemale_SelectionChanged"                        
