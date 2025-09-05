@@ -1,4 +1,5 @@
 ﻿
+using DocumentFormat.OpenXml.Spreadsheet;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
@@ -27,36 +28,152 @@ namespace WpfApplication1 {
       studentsPage.AddMale += StudentsPage_AddMale;
       studentsPage.AddFemale += StudentsPage_AddFemale;
       studentsPage.NameClicked += StudentsPage_NameClicked;
-      
+
+      highestScoresPage.SaveExamClicked += HighestScores_SaveExamClicked;
+      highestScoresPage.SaveWrittenWorksClicked += HighestScores_SaveWrittenWorksClicked;
+      highestScoresPage.SavePerformanceTasksClicked += HighestScores_SavePerformanceTasksClicked;
+
+      studentDetails.SaveExamClicked += StudentDetails_SaveExamClicked;
+      studentDetails.SaveWrittenWorksClicked += StudentDetails_SaveWrittenWorksClicked;
+      studentDetails.SavePerformanceTasksClicked += StudentDetails_SavePerformanceTasksClicked;
+
     }
 
-    private void StudentsPage_NameClicked(object sender, (uint row, string name) tuple) {
+    private async void StudentDetails_SaveExamClicked(object sender, EventArgs e) {
+      (string exam, string grade, int transmutedGrade) = await Task.Run(() => {
+        _workbookService.EditStudentExam(
+          studentDetails.Exam,
+          studentDetails.StudentRow
+          );
+        var (writtenWorks, performanceTasks, exam, grade) =
+          _workbookService.ReadStudentScores(studentDetails.StudentRow);
+        var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
+        return (exam, grade, transmuted);
+      });
+      studentDetails.Exam = exam;
+
+      studentDetails.SetGrade(transmutedGrade.ToString());
+      studentDetails.SetSaveExamBtnEnabled(false);
+    }
+
+    private async void StudentDetails_SaveWrittenWorksClicked(object sender, EventArgs e) {
+      (List<string> writtenWorksScores, string grade, int transmutedGrade) = await Task.Run(() => {
+        _workbookService.EditStudentScore(
+          studentDetails.WrittenWorks.Select(p => p.Value).ToList(),
+          studentDetails.StudentRow
+          );
+
+        var (writtenWorks, performanceTasks, exam, grade) =
+          _workbookService.ReadStudentScores(studentDetails.StudentRow);
+        var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
+        return (writtenWorks, grade, transmuted);
+      });
+      studentDetails.WrittenWorks.Clear();
+      studentDetails.OriginalWrittenWork.Clear();
+      for (int i = 0; i < _workbookService.WrittenWorks.Count; i++) {
+        studentDetails.WrittenWorks.Add(new FieldDefinition {
+          Label = _workbookService.WrittenWorks[i],
+          Value = writtenWorksScores[i]
+        });
+        studentDetails.OriginalWrittenWork.Add(writtenWorksScores[i]);
+      }
+
+      studentDetails.SetGrade(transmutedGrade.ToString());
+      studentDetails.SetSaveWrittenWorksBtnEnabled(false);
+    }
+
+    private async void StudentDetails_SavePerformanceTasksClicked(object sender, EventArgs e) {
+      (List<string> performanceTasksScores, string grade, int transmutedGrade) = await Task.Run(() => {
+        _workbookService.EditStudentScore(
+          studentDetails.PerformanceTasks.Select(p => p.Value).ToList(),
+          studentDetails.StudentRow,
+          false
+          );
+
+        var (writtenWorks, performanceTasks, exam, grade) =
+          _workbookService.ReadStudentScores(studentDetails.StudentRow);
+        var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
+        return (performanceTasks, grade, transmuted);
+      });
+      studentDetails.PerformanceTasks.Clear();
+      studentDetails.OriginalPerformanceTask.Clear();
+      for (int i = 0; i < _workbookService.PerformanceTasks.Count; i++) {
+        studentDetails.PerformanceTasks.Add(new FieldDefinition {
+          Label = _workbookService.PerformanceTasks[i],
+          Value = performanceTasksScores[i]
+        });
+        studentDetails.OriginalPerformanceTask.Add(performanceTasksScores[i]);
+      }
+
+      studentDetails.SetGrade(transmutedGrade.ToString());
+      studentDetails.SetSavePerformanceTasksBtnEnabled(false);
+    }
+
+    private async void HighestScores_SaveExamClicked(object sender, EventArgs e) {
+      await Task.Run(() => {
+        _workbookService.EditExamScore(highestScoresPage.Exam);
+      });
+      highestScoresPage.Exam = _workbookService.Exam;
+      highestScoresPage.SetExamBtnEnabled(false);
+    }
+
+    private async void HighestScores_SaveWrittenWorksClicked(object sender, EventArgs e) {
+
+      await Task.Run(() => {
+        _workbookService.EditHighestPossibleScore(highestScoresPage.WrittenWorks.ToList(), true);
+      });
+
+      highestScoresPage.WrittenWorks.Clear();
+      _workbookService.WrittenWorks.ForEach(score => highestScoresPage.WrittenWorks.Add(score));
+
+    }
+
+    private async void HighestScores_SavePerformanceTasksClicked(object sender, EventArgs e) {
+
+      await Task.Run(() => {
+        _workbookService.EditHighestPossibleScore(highestScoresPage.PerformanceTasks.ToList(), false);
+      });
+
+      highestScoresPage.PerformanceTasks.Clear();
+      _workbookService.PerformanceTasks.ForEach(score => highestScoresPage.PerformanceTasks.Add(score));
+
+    }
+
+    private async void StudentsPage_NameClicked(object sender, (uint row, string name) tuple) {
       studentDetails.OriginalWrittenWork.Clear();
       studentDetails.OriginalPerformanceTask.Clear();
       studentDetails.WrittenWorks.Clear();
       studentDetails.PerformanceTasks.Clear();
-      var (writtenWorks, performanceTasks) = _workbookService.ReadStudentScores(tuple.row);
-      studentDetails.SetName(tuple.name);
+      (List<string> writtenWorks, List<string> performanceTasks, string exam, string grade, int transmutedGrade) = await Task.Run(() => {
+        var (writtenWorks, performanceTasks, exam, grade) = _workbookService.ReadStudentScores(tuple.row);
+        var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
+        return (writtenWorks, performanceTasks, exam, grade, transmuted);
+      });
+
+      studentDetails.StudentRow = tuple.row;
+      studentDetails.StudentName = tuple.name;
+      studentDetails.Exam = exam;
+      studentDetails.SetGrade(transmutedGrade.ToString());
       for (int i = 0; i < _workbookService.WrittenWorks.Count; i++) {
-        if (writtenWorks[i] != "") {
-          studentDetails.WrittenWorks.Add(new FieldDefinition {
-            Label = _workbookService.WrittenWorks[i],
-            Value = writtenWorks[i]
-          });
-          studentDetails.OriginalWrittenWork.Add(writtenWorks[i]);
-        }
+
+        studentDetails.WrittenWorks.Add(new FieldDefinition {
+          Label = _workbookService.WrittenWorks[i],
+          Value = writtenWorks[i]
+        });
+        studentDetails.OriginalWrittenWork.Add(writtenWorks[i]);
+
       }
 
       for (int i = 0; i < _workbookService.PerformanceTasks.Count; i++) {
-        if (performanceTasks[i] != "") {
-          studentDetails.PerformanceTasks.Add(new FieldDefinition {
-            Label = _workbookService.PerformanceTasks[i],
-            Value = performanceTasks[i]
-          });
-          studentDetails.OriginalPerformanceTask.Add(performanceTasks[i]);
-        }
-      }
 
+        studentDetails.PerformanceTasks.Add(new FieldDefinition {
+          Label = _workbookService.PerformanceTasks[i],
+          Value = performanceTasks[i]
+        });
+        studentDetails.OriginalPerformanceTask.Add(performanceTasks[i]);
+
+      }
+      rbtnStudents.IsChecked = false;
       MainContent.Content = studentDetails;
     }
 
@@ -74,6 +191,11 @@ namespace WpfApplication1 {
 
     }
 
+    private void StudentsPage_CLiked(object sender, EventArgs e) {
+      MainContent.Content = studentsPage;
+      rbtnStudents.IsChecked = true;
+    }
+
     private async void HomePage_FileChosen(object sender, string[] file) {
       homePage.SetLoading(true);
 
@@ -82,7 +204,7 @@ namespace WpfApplication1 {
         _workbookService.LoadWorkbook(file[0]);
 
         if (!_workbookService.IsFileECR()) {
-          return ( 
+          return (
             false,
             "",
             [],
@@ -121,7 +243,7 @@ namespace WpfApplication1 {
       highestScoresPage.PerformanceTasks.Clear();
       _workbookService.PerformanceTasks.ForEach(score => highestScoresPage.PerformanceTasks.Add(score));
 
-      highestScoresPage.SetExam(_workbookService.Exam);
+      highestScoresPage.Exam = _workbookService.Exam;
 
       rbtnScores.IsEnabled = rbtnStudents.IsEnabled = true;
       rbtnFile.IsChecked = false;
