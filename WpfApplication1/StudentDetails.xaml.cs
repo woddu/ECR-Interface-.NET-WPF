@@ -1,9 +1,14 @@
 ﻿
+using DocumentFormat.OpenXml.Drawing.Charts;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace WpfApplication1 {
@@ -20,12 +25,46 @@ namespace WpfApplication1 {
 
     public ObservableCollection<FieldDefinition> PerformanceTasks { get; set; } = new ObservableCollection<FieldDefinition>();
 
-    public string Exam;
+    private string _exam;
+
+    public string Exam {
+      get { return _exam; }
+      set {
+        txtExam.Text = _exam = value;
+      }
+    }
+
+    public string StudentName {
+      get { return tbName.Text; }
+      set { 
+        tbName.Text = value;
+        btnDeleteStudent.ToolTip = "Delete " + value;
+      }
+    }
+
+    public uint StudentRow { get; set; }
+
+    public EventHandler SaveExamClicked;
+    public EventHandler SaveWrittenWorksClicked;
+    public EventHandler SavePerformanceTasksClicked;
+    public EventHandler DeleteStudent;
 
     public StudentDetails() {
       InitializeComponent();
       DataContext = this;
     }
+
+    private void SaveExam_Click(object sender, RoutedEventArgs e) {
+      _exam = txtExam.Text;
+      SaveExamClicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void SaveWrittenWorks_Click(object sender, RoutedEventArgs e) =>
+      SaveWrittenWorksClicked?.Invoke(this, EventArgs.Empty);
+    
+
+    private void SavePerformanceTasks_Click(object sender, RoutedEventArgs e) =>
+      SavePerformanceTasksClicked?.Invoke(this, EventArgs.Empty);
 
     private void WrittenScoresTextChanged(object sender, TextChangedEventArgs e) {
       var tb = (TextBox)sender;
@@ -34,6 +73,7 @@ namespace WpfApplication1 {
       string newValue = tb.Text;
       string oldValue = OriginalWrittenWork[index];
       btnSaveWrittenWorks.IsEnabled = (newValue != oldValue);
+      List<string> valuesList = [.. WrittenWorks.Select(w => w.Value)];
     }
 
     private void PerformanceScoresTextChanged(object sender, TextChangedEventArgs e) {
@@ -44,18 +84,37 @@ namespace WpfApplication1 {
       string oldValue = OriginalPerformanceTask[index];
       btnSavePerformanceTasks.IsEnabled = (newValue != oldValue);
     }
+
+    private void DeleteStudent_Click(object sender, RoutedEventArgs e) {
+      DeleteStudent?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ExamTextChanged(object sender, TextChangedEventArgs e) {
+      btnSaveExam.IsEnabled = txtExam.Text != Exam;
+    }
+
     private void NumberOnlyTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
       e.Handled = !int.TryParse(e.Text, out _);
     }
 
-    public void SetName(string name) => lblName.Content = name;
-
-    public void SetExam(string exam) => lblExam.Content = exam;
-
-    public void SetGrade(string grade) {
-
-    }
+    public void SetSaveExamBtnEnabled(bool enabled) => btnSaveExam.IsEnabled = enabled;
+    public void SetSaveWrittenWorksBtnEnabled(bool enabled) => btnSaveWrittenWorks.IsEnabled = enabled;
+    public void SetSavePerformanceTasksBtnEnabled(bool enabled) => btnSavePerformanceTasks.IsEnabled = enabled;    
+    
+    public void SetGrade(string grade) => tbExam.Text = grade;
 
   }
+  public class EmptyToVisibilityConverter : IMultiValueConverter {
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture) {
+      string value = values[0] as string;
+      string label = values[1] as string;
 
+      return string.IsNullOrWhiteSpace(value) && string.IsNullOrWhiteSpace(label)
+          ? Visibility.Collapsed
+          : Visibility.Visible;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+  }
 }
