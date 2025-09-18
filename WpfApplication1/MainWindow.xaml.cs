@@ -25,6 +25,9 @@ namespace WpfApplication1 {
       InitializeComponent();
       MainContent.Content = homePage;
       homePage.FileChosen += HomePage_FileChosen;
+      homePage.QuarterChosen += Homepage_QuarterChosen;
+      homePage.TrackChosen += HomePage_Track_Chosen;
+
       studentsPage.AddMale += StudentsPage_AddMale;
       studentsPage.AddFemale += StudentsPage_AddFemale;
       studentsPage.NameClicked += StudentsPage_NameClicked;
@@ -37,6 +40,26 @@ namespace WpfApplication1 {
       studentDetails.SaveWrittenWorksClicked += StudentDetails_SaveWrittenWorksClicked;
       studentDetails.SavePerformanceTasksClicked += StudentDetails_SavePerformanceTasksClicked;
 
+    }
+
+    private async void HomePage_Track_Chosen(object sender, int e) {
+      if (WorkbookService.tracks[e] != _workbookService.Track) {
+        homePage.SetLoading(true);
+        _workbookService.Track = WorkbookService.tracks[e];
+        homePage.SetLoading(false);
+      }
+    }
+
+    private async void Homepage_QuarterChosen(object sender, bool e) {      
+      if (e != _workbookService.Quarter1) {
+        homePage.SetLoading(true);
+        await Task.Run(() => {
+          _workbookService.ChangeQuarter();
+        });
+
+        homePage.ChangeQuarter(_workbookService.Quarter1);
+        homePage.SetLoading(false);
+      }
     }
 
     private async void StudentDetails_SaveExamClicked(object sender, EventArgs e) {
@@ -198,8 +221,7 @@ namespace WpfApplication1 {
 
     private async void HomePage_FileChosen(object sender, string[] file) {
       homePage.SetLoading(true);
-
-      // Step 2: Run heavy work in background and return a WorkbookResult
+      
       (bool isValid, string fileName, List<string> maleNames, List<string> femaleNames) = await Task.Run(() => {
         _workbookService.LoadWorkbook(file[0]);
 
@@ -221,15 +243,15 @@ namespace WpfApplication1 {
           femaleNames?.ToList()
         );
       });
-
-      // Step 3: Back on UI thread — safe to update UI
+      
       if (!isValid) {
         homePage.ShowError("Missing Sheets", "Missing Sheets: " + _workbookService.MissingSheets);
         homePage.SetLoading(false);
         return;
       }
 
-      homePage.SetFileName(fileName);
+      homePage.SetFileName(fileName);      
+      this.Title = fileName;
 
       studentsPage.MaleNames.Clear();
       maleNames.ForEach(name => studentsPage.MaleNames.Add(name));
@@ -250,8 +272,6 @@ namespace WpfApplication1 {
       rbtnStudents.IsChecked = true;
 
       homePage.SetLoading(false);
-      MainContent.Content = studentsPage;
-      this.Title = fileName;
     }
 
 
