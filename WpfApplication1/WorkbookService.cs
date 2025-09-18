@@ -58,7 +58,7 @@ public class WorkbookService : IDisposable {
     new GradeRange (0.00,  3.99,  60 )
   ];
 
-  private readonly static string[] tracks = [
+  public readonly static string[] tracks = [
     "Core Subject (All Tracks)",
     "Academic Track (except Immersion)",
     "Work Immersion/ Culminating Activity (for Academic Track)",
@@ -81,9 +81,9 @@ public class WorkbookService : IDisposable {
 
   public string FilePath { get; private set; }
 
-  public bool Quarter { get; set; }
+  public bool Quarter1 { get; private set; }
 
-  public string Track { get; private set; }
+  public string Track { get; set; }
 
   public List<string> WrittenWorks { get; private set; } = [];
 
@@ -96,7 +96,6 @@ public class WorkbookService : IDisposable {
   public bool HasFileLoaded => !string.IsNullOrWhiteSpace(FilePath);
 
   public bool IsFileECR() {
-
     using (var doc = SpreadsheetDocument.Open(FilePath, false)) {
       var wbPart = doc.WorkbookPart;
       var sheetNames = wbPart.Workbook.Sheets
@@ -122,6 +121,9 @@ public class WorkbookService : IDisposable {
   }
 
   public int GetComputedGrade(List<string> writtenWorksScores, List<string> performanceTaskScores, string examScore) {
+
+    int trackIndex = Array.IndexOf(tracks, Track);
+
     double writtenWorksTotal = WrittenWorks
         .Select(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0)
         .Sum();
@@ -132,7 +134,7 @@ public class WorkbookService : IDisposable {
             .Sum() / writtenWorksTotal * 100.0
         : 0;    
     
-    double wwWeightedScore = wwPercentageScore * weightedScores[3,0];
+    double wwWeightedScore = wwPercentageScore * weightedScores[trackIndex,0];
 
     double performanceTasksTotal = PerformanceTasks
         .Select(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0)
@@ -142,23 +144,28 @@ public class WorkbookService : IDisposable {
             .Select(s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0)
             .Sum() / performanceTasksTotal * 100.0
         : 0;
-    double ptWeightedScore = ptPercentageScore * weightedScores[3, 1];
+    double ptWeightedScore = ptPercentageScore * weightedScores[trackIndex, 1];
 
     double examTotal = double.TryParse(Exam, NumberStyles.Any, CultureInfo.InvariantCulture, out var et) ? et : 0;
     double examPercentageScore = examTotal > 0
         ? (double.TryParse(examScore, NumberStyles.Any, CultureInfo.InvariantCulture, out var es) ? es : 0) / examTotal * 100.0
         : 0;
 
-    double examWeightedScore = examPercentageScore * weightedScores[3, 2];
+    double examWeightedScore = examPercentageScore * weightedScores[trackIndex, 2];
 
     double initialGrade = wwWeightedScore + ptWeightedScore + examWeightedScore;
 
     return GetTransmutedGrade(initialGrade, gradeTable);
   }
 
-
   public void LoadWorkbook(string path) {
     FilePath = path;
+  }
+
+  public void ChangeQuarter() {
+    Quarter1 = !Quarter1;
+    using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, false);
+    ReadHighestPossibleScores(doc);
   }
 
   public (List<string> maleNames, List<string> femaleNames) ReadAllNames() {
@@ -310,7 +317,7 @@ public class WorkbookService : IDisposable {
     WorkbookPart wbPart = doc.WorkbookPart;
     Sheet sheet = wbPart.Workbook.Sheets
         .OfType<Sheet>()
-        .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
+        .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
 
     if (sheet == null) return;
 
@@ -380,7 +387,7 @@ public class WorkbookService : IDisposable {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
 
       if (sheet == null) return (values1, values2, examVal, gradeVal);
 
@@ -432,7 +439,7 @@ public class WorkbookService : IDisposable {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
 
       if (sheet == null) return;
 
@@ -495,7 +502,7 @@ public class WorkbookService : IDisposable {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
       if (sheet == null) return;
       WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
       SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
@@ -521,7 +528,7 @@ public class WorkbookService : IDisposable {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
 
       if (sheet == null) return;
 
@@ -588,7 +595,7 @@ public class WorkbookService : IDisposable {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
       if (sheet == null) return;
       WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
       SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
