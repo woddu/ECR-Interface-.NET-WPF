@@ -14,7 +14,7 @@ public class WorkbookService : IDisposable {
     int Transmuted
   );
 
-  private readonly List<GradeRange> gradeTable = [
+  private readonly static List<GradeRange> gradeTable = [
     new GradeRange (100.00, 100.00, 100 ),
     new GradeRange (98.40, 99.99, 99 ),
     new GradeRange (96.80, 98.39, 98 ),
@@ -67,7 +67,7 @@ public class WorkbookService : IDisposable {
 
   private readonly static double[,] weightedScores = {
     { 0.25, 0.50, 0.25 }, // Core Subject (All Tracks)
-    { 0.25, 0.45, 30 }, // Academic Track (except Immersion)
+    { 0.25, 0.45, 0.30 }, // Academic Track (except Immersion)
     { 0.35, 0.40, 0.25 }, // Work Immersion/ Culminating Activity (for Academic Track)
     { 0.20, 0.60, 0.20 }  // TVL/ Sports/ Arts and Design Track
   };
@@ -80,6 +80,8 @@ public class WorkbookService : IDisposable {
   ];
 
   public string FilePath { get; private set; }
+
+  public bool Quarter { get; set; }
 
   public string Track { get; private set; }
 
@@ -164,6 +166,7 @@ public class WorkbookService : IDisposable {
     var maleNames = ReadNames(doc, true);
     var femaleNames = ReadNames(doc, false);
     ReadHighestPossibleScores(doc);
+
     return (maleNames, femaleNames);
   }
 
@@ -197,7 +200,7 @@ public class WorkbookService : IDisposable {
 
     return values;
   }
-
+  
   public List<string> AppendAndSortNames(string newValue, bool male = true) {
     string columnLetter = "B";
     uint startRow = male ? 13u : 64u;
@@ -300,14 +303,14 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  public void ReadHighestPossibleScores(SpreadsheetDocument doc, bool sem1 = true) {
+  public void ReadHighestPossibleScores(SpreadsheetDocument doc) {
     WrittenWorks.Clear();
     PerformanceTasks.Clear();
     uint fixedRow = 11u;
     WorkbookPart wbPart = doc.WorkbookPart;
     Sheet sheet = wbPart.Workbook.Sheets
         .OfType<Sheet>()
-        .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+        .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
 
     if (sheet == null) return;
 
@@ -366,8 +369,7 @@ public class WorkbookService : IDisposable {
   }
 
   public (List<string> writtenWorks, List<string> performanceTasks, string exam, string grade) ReadStudentScores(
-    uint row,
-    bool sem1 = true
+    uint row
   ) {
 
     var values1 = new List<string>();
@@ -378,7 +380,7 @@ public class WorkbookService : IDisposable {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
 
       if (sheet == null) return (values1, values2, examVal, gradeVal);
 
@@ -423,14 +425,14 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  public void EditHighestPossibleScore(List<string> scores, bool isWrittenWork = true, bool sem1 = true) {
+  public void EditHighestPossibleScore(List<string> scores, bool isWrittenWork = true) {
     uint fixedRow = 11u;
 
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
 
       if (sheet == null) return;
 
@@ -483,17 +485,17 @@ public class WorkbookService : IDisposable {
       wsPart.Worksheet.Save();
       wbPart.Workbook.Save();
 
-      ReadHighestPossibleScores(doc, sem1);
+      ReadHighestPossibleScores(doc);
     }
   }
 
-  public void EditExamScore(string newValue, bool sem1 = true) {
+  public void EditExamScore(string newValue) {
     string cellRef = $"AF11";
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
       if (sheet == null) return;
       WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
       SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
@@ -513,13 +515,13 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  public void EditStudentScore(List<string> scores, uint studentRow, bool isWrittenWork = true, bool sem1 = true) {
+  public void EditStudentScore(List<string> scores, uint studentRow, bool isWrittenWork = true) {
 
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
 
       if (sheet == null) return;
 
@@ -576,17 +578,17 @@ public class WorkbookService : IDisposable {
       wsPart.Worksheet.Save();
       wbPart.Workbook.Save();
 
-      ReadHighestPossibleScores(doc, sem1);
+      ReadHighestPossibleScores(doc);
     }
   }
 
-  public void EditStudentExam(string newValue, uint row, bool sem1 = true) {
+  public void EditStudentExam(string newValue, uint row) {
     string cellRef = $"AF{row}";
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
           .OfType<Sheet>()
-          .FirstOrDefault(s => s.Name == (sem1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+          .FirstOrDefault(s => s.Name == (Quarter ? requiredSheetNames[1] : requiredSheetNames[2]));
       if (sheet == null) return;
       WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
       SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
