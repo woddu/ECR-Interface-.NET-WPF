@@ -27,6 +27,7 @@ namespace WpfApplication1 {
       }
     }
 
+
     public EventHandler SaveExamClicked;
     public EventHandler SaveWrittenWorksClicked;
     public EventHandler SavePerformanceTasksClicked;
@@ -35,6 +36,10 @@ namespace WpfApplication1 {
       InitializeComponent();
       DataContext = this;
     }
+
+    public void SetWrittenWorksPercentage(string percentage) => tbWrittenWorks.Text = "Writtent Works : " + percentage;
+    public void SetPerformancePercentage(string percentage) => tbPerformanceTasks.Text = "Performance Tasks : " + percentage;
+    public void SetExamPercentage(string percentage) => tbExam.Text = "Exam : " + percentage;
 
     private void SaveExam_Click(object sender, System.Windows.RoutedEventArgs e) =>
       SaveExamClicked?.Invoke(this, EventArgs.Empty);
