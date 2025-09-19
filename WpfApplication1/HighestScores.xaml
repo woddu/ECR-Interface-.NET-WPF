@@ -77,7 +77,8 @@
                 Grid.Column="0"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center">
-                <TextBlock 
+                <TextBlock
+                    x:Name="tbWrittenWorks"
                     Text="Written Works" 
                     VerticalAlignment="Center" 
                     HorizontalAlignment="Left"
@@ -160,8 +161,9 @@
                 Grid.Column="0"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center">
-                <TextBlock 
-                    Text="Performance Task" 
+                <TextBlock
+                    x:Name="tbPerformanceTasks"
+                    Text="Performance Tasks" 
                     VerticalAlignment="Center" 
                     HorizontalAlignment="Left"
                     Padding="0,16"
@@ -190,7 +192,8 @@
         <StackPanel Grid.Column="1"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center">
-            <TextBlock 
+            <TextBlock
+                x:Name="tbExam"
                 Text="Exam" 
                 VerticalAlignment="Center" 
                 HorizontalAlignment="Left"
