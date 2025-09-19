@@ -11,60 +11,95 @@
         FontSize="14"
         FontFamily="Microsoft YaHei UI"
         Title="MainWindow" Height="500" Width="1000">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50
-                           "/>
-            <!-- Sidebar -->
-            <RowDefinition Height="*"/>
-            <!-- Content -->
-        </Grid.RowDefinitions>
+    <materialDesign:DialogHost x:Name="RootDialog" CloseOnClickAway="True">
 
-        <!-- Sidebar -->
-        <Grid
+        <!-- Dialog Content -->
+        <materialDesign:DialogHost.DialogContent>
+            <StackPanel Margin="20" Width="300">
+                <StackPanel 
+                Orientation="Horizontal"                    
+                Margin="0,0,0,10">
+
+                    <materialDesign:PackIcon Kind="AlertCircle" Foreground="Red" Width="32" Height="32"/>
+                    <TextBlock x:Name="ErrorTitle"
+                    Text="Error"
+                    FontSize="20"
+                    Foreground="Red"
+                    FontWeight="Bold"
+                    Margin="10,0,0,0"/>
+                </StackPanel>
+                <TextBlock x:Name="ErrorDescription"
+                Text="Something went wrong while processing your request."
+                TextWrapping="Wrap"
+                Margin="0,0,0,20"/>
+                <Button Content="OK"
+                IsDefault="True"
+                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                Style="{StaticResource MaterialDesignRaisedButton}"/>
+            </StackPanel>
+        </materialDesign:DialogHost.DialogContent>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50
+                           "/>
+                <!-- Sidebar -->
+                <RowDefinition Height="*"/>
+                <!-- Content -->
+            </Grid.RowDefinitions>
+
+            <!-- Sidebar -->
+            <Grid
             Background="#004C9A" 
             Grid.Row="0"
             >
-            <StackPanel
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Center"
-                Orientation="Horizontal">
-                <RadioButton x:Name="rbtnFile"
-                    Margin="4"
-                    Content="File"
-                    IsChecked="True"
-                    Checked="Tab_Checked"
-                    Style="{StaticResource MaterialDesignTabRadioButton}" 
-                    FontSize="18"
-                    Cursor="Hand"
-                    Foreground="White"/>
-                <RadioButton x:Name="rbtnScores"
-                    Margin="4"
-                    Content="Scores"
-                    IsEnabled="False"
-                    Checked="Tab_Checked"
-                    Style="{StaticResource MaterialDesignTabRadioButton}" 
-                    FontSize="18"
-                    Cursor="Hand"
-                    Foreground="White"/>
-                <RadioButton x:Name="rbtnStudents"
-                    Margin="4"
-                    Content="Students"
-                    IsEnabled="False"
-                    Checked="Tab_Checked"         
-                    Style="{StaticResource MaterialDesignTabRadioButton}" 
-                    FontSize="18"
-                    Cursor="Hand"
-                    Foreground="White"
-                    Click="StudentsPage_CLiked"/>
-            </StackPanel>
-        </Grid>
+                <DockPanel 
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch">
+                    <ProgressBar x:Name="MyProgressBar" DockPanel.Dock="Bottom" IsIndeterminate="True" />
+                    <StackPanel
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Center"
+                        Orientation="Horizontal">
+                        <RadioButton x:Name="rbtnFile"
+                        Margin="4"
+                        Content="File"
+                        IsChecked="True"
+                        Checked="Tab_Checked"
+                        Style="{StaticResource MaterialDesignTabRadioButton}" 
+                        FontSize="18"
+                        Cursor="Hand"
+                        Foreground="White"/>
+                        <RadioButton x:Name="rbtnScores"
+                        Margin="4"
+                        Content="Scores"
+                        IsEnabled="False"
+                        Checked="Tab_Checked"
+                        Style="{StaticResource MaterialDesignTabRadioButton}" 
+                        FontSize="18"
+                        Cursor="Hand"
+                        Foreground="White"/>
+                        <RadioButton x:Name="rbtnStudents"
+                        Margin="4"
+                        Content="Students"
+                        IsEnabled="False"
+                        Checked="Tab_Checked"         
+                        Style="{StaticResource MaterialDesignTabRadioButton}" 
+                        FontSize="18"
+                        Cursor="Hand"
+                        Foreground="White"
+                        Click="StudentsPage_CLiked"/>
+                    </StackPanel>
+                    
+                </DockPanel>
+            </Grid>
 
-        <!-- Content Area -->
-        <ContentControl x:Name="MainContent" 
+            <!-- Content Area -->
+            <ContentControl x:Name="MainContent" 
                         Grid.Row="1" Margin="0,0,0,15"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         />
-    </Grid>
+            
+        </Grid>
+    </materialDesign:DialogHost>
 </Window>
