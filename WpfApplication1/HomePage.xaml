@@ -7,8 +7,9 @@
              xmlns:local="clr-namespace:WpfApplication1"
              mc:Ignorable="d"
              d:DesignHeight="435" d:DesignWidth="1000">
+
     <Grid>
-        
+
         <StackPanel
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
@@ -68,8 +69,5 @@
                     Style="{StaticResource MaterialDesignLabelLargeTextBlock}"/>
             </Button>
         </StackPanel>
-
-        
-
     </Grid>
 </UserControl>

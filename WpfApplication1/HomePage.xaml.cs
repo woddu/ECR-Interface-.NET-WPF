@@ -17,8 +17,13 @@ namespace WpfApplication1 {
 
     public HomePage() {
       InitializeComponent();
+      FileName.Visibility = Visibility.Collapsed;
       spQuarter.Visibility = Visibility.Collapsed;
-      cBoxTracks.Visibility = Visibility.Visible;
+      cBoxTracks.Visibility = Visibility.Collapsed;
+    }
+
+    public void SetTrack(int index) {
+      cBoxTracks.SelectedIndex = index;
     }
 
     private void Track_SelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -45,6 +50,7 @@ namespace WpfApplication1 {
       }
     }
     private void ChooseFile_Click(object sender, RoutedEventArgs e) {
+      btnChooseFile.IsEnabled = false;
       var dialog = new OpenFileDialog {
         Title = "Select an Excel file",
         Filter = "Excel Files (*.xlsx;*.xls)|*.xlsx;*.xls"
@@ -58,28 +64,23 @@ namespace WpfApplication1 {
                     dialog.FileName,
                     Path.GetFileNameWithoutExtension(dialog.FileName)
         });
+      } else {
+        btnChooseFile.IsEnabled = true;
       }
-    }
-
-    public void ShowError(string title, string error) {
-      MessageBox.Show(
-          "Error: " + error,          // Title bar text
-          title,    // Message text
-          MessageBoxButton.OK,        // Buttons to display
-          MessageBoxImage.Error       // Icon type
-      );
-    }
+    }    
 
     public void SetFileName(string fileName) {
       FileName.Text = fileName;
       btnChooseFile.Content = "Choose a Different File";
       btnChooseFile.IsEnabled = true;
+      FileName.Visibility = Visibility.Visible;
       spQuarter.Visibility = Visibility.Visible;
       cBoxTracks.Visibility = Visibility.Visible;
     }
 
     public void SetLoading(bool isLoading) {
       ButtonProgressAssist.SetIsIndeterminate(btnChooseFile, isLoading);
+      btnChooseFile.IsEnabled = !isLoading;
     }
 
   }
