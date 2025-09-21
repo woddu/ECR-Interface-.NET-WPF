@@ -65,7 +65,7 @@ public class WorkbookService : IDisposable {
     "TVL/ Sports/ Arts and Design Track"
   ];
 
-  private readonly static double[,] weightedScores = {
+  public readonly static double[,] weightedScores = {
     { 0.25, 0.50, 0.25 }, // Core Subject (All Tracks)
     { 0.25, 0.45, 0.30 }, // Academic Track (except Immersion)
     { 0.35, 0.40, 0.25 }, // Work Immersion/ Culminating Activity (for Academic Track)
@@ -81,7 +81,7 @@ public class WorkbookService : IDisposable {
 
   public string FilePath { get; private set; }
 
-  public bool Quarter1 { get; private set; }
+  public bool Quarter1 { get; private set; } = true;
 
   public string Track { get; set; }
 
@@ -93,6 +93,7 @@ public class WorkbookService : IDisposable {
 
   public string Exam { get; private set; }
 
+  public double[] WeightedScores { get; set; } = { weightedScores[0, 0], weightedScores[0, 1], weightedScores[0, 2] };
   public bool HasFileLoaded => !string.IsNullOrWhiteSpace(FilePath);
 
   public bool IsFileECR() {
@@ -162,6 +163,37 @@ public class WorkbookService : IDisposable {
     FilePath = path;
   }
 
+  public void ChangeTrack(int index) {
+    using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true);
+
+    WorkbookPart wbPart = doc.WorkbookPart;
+    Sheet sheet = wbPart.Workbook.Sheets
+        .OfType<Sheet>()
+        .FirstOrDefault(s => s.Name == requiredSheetNames[0]);
+    if (sheet == null) return;
+    WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
+    SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
+    InsertCellValue(sheetData, "AE8", tracks[index]);
+    // Force recalculation if needed
+    var calcProps = wbPart.Workbook.CalculationProperties;
+    if (calcProps == null) {
+      calcProps = new CalculationProperties();
+      wbPart.Workbook.Append(calcProps);
+    }
+    calcProps.FullCalculationOnLoad = true;
+    calcProps.ForceFullCalculation = true;
+    calcProps.CalculationOnSave = true;
+    wsPart.Worksheet.Save();
+    wbPart.Workbook.Save();
+
+    Track = tracks[index];
+
+    WeightedScores = index >= 0
+        ? [weightedScores[index, 0], weightedScores[index, 1], weightedScores[index, 2]]
+        : [weightedScores[0, 0], weightedScores[0, 1], weightedScores[0, 2]];
+
+  }
+
   public void ChangeQuarter() {
     Quarter1 = !Quarter1;
     using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, false);
@@ -172,7 +204,7 @@ public class WorkbookService : IDisposable {
     using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, false);
     var maleNames = ReadNames(doc, true);
     var femaleNames = ReadNames(doc, false);
-    ReadHighestPossibleScores(doc);
+    ReadHighestPossibleScores(doc);    
 
     return (maleNames, femaleNames);
   }
@@ -350,7 +382,6 @@ public class WorkbookService : IDisposable {
         } else if (i == 1) {
           PerformanceTasks.Add(val);
         }
-        //}
       }
     }
 
@@ -370,8 +401,9 @@ public class WorkbookService : IDisposable {
     Track = GetCellValue(doc, cell);
     int index = Array.IndexOf(tracks, Track);
 
-    Debug.WriteLine($"Track: {Track}, Index Of : {index}");
-
+    WeightedScores = index >= 0
+        ? [ weightedScores[index, 0], weightedScores[index, 1], weightedScores[index, 2] ]
+        : [ weightedScores[0, 0], weightedScores[0, 1], weightedScores[0, 2] ];
 
   }
 
