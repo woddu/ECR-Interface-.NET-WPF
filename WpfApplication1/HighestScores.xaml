@@ -44,16 +44,20 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" 
-                                    HorizontalAlignment="Left"
-                                    Margin="5">
-                            <TextBlock Text="{Binding
+                        <Border BorderBrush="LightGray"
+                                BorderThickness="1,0,1,1">
+                            <StackPanel Orientation="Vertical" 
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Margin="5"
+                                    >
+                                <TextBlock Text="{Binding
                                 RelativeSource={RelativeSource Mode=FindAncestor,
                                                                   AncestorType=ContentPresenter},
                                 Path=(ItemsControl.AlternationIndex),
                                 Converter={StaticResource IndexToActivityLabelConverter}}"
                                 Margin="5"/>
-                            <TextBox
+                                <TextBox
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                                         Path=(ItemsControl.AlternationIndex)}"
                                 Text="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -67,7 +71,8 @@
                                 MaxLength="2"
                                 materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                                 TextChanged="WrittenScoresTextChanged"/>
-                        </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -110,8 +115,6 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 AlternationCount="1000"
-                BorderBrush="LightGray"
-                BorderThickness="0,1,0,0"
                 Padding="4"
                 ItemsSource="{Binding PerformanceTasks}">       
 
@@ -124,16 +127,19 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" 
-                                    HorizontalAlignment="Left"
+                        <Border BorderBrush="LightGray"
+                                BorderThickness="1,0,1,1">
+                            <StackPanel Orientation="Vertical" 
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
                                     Margin="5">
-                            <TextBlock Text="{Binding
+                                <TextBlock Text="{Binding
                                 RelativeSource={RelativeSource Mode=FindAncestor,
                                                                   AncestorType=ContentPresenter},
                                 Path=(ItemsControl.AlternationIndex),
                                 Converter={StaticResource IndexToActivityLabelConverter}}"
                                 Margin="5"/>
-                            <TextBox
+                                <TextBox
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                                     Path=(ItemsControl.AlternationIndex)}"
                                 Text="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -147,15 +153,12 @@
                                 MaxLength="2"
                                 materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                                 TextChanged="PerformanceScoresTextChanged"/>
-                        </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-
-            <Border Grid.Row="1"
-                    Grid.Column="0"
-                    BorderBrush="LightGray"
-                    BorderThickness="0,1,0,0" />
+            
             <StackPanel
                 Grid.Row="1"
                 Grid.Column="0"

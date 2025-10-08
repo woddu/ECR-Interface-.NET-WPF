@@ -134,16 +134,19 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" 
+                            <Border BorderBrush="LightGray"
+                                    BorderThickness="1,0,1,1">
+                                <StackPanel Orientation="Horizontal" 
                                         VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
                                         Margin="2">
-                                <StackPanel.Visibility>
-                                    <MultiBinding Converter="{StaticResource EmptyToVisibilityConverter}">
-                                        <Binding Path="Value"/>
-                                        <Binding Path="Label"/>
-                                    </MultiBinding>
-                                </StackPanel.Visibility>
-                                <TextBox 
+                                    <StackPanel.Visibility>
+                                        <MultiBinding Converter="{StaticResource EmptyToVisibilityConverter}">
+                                            <Binding Path="Value"/>
+                                            <Binding Path="Label"/>
+                                        </MultiBinding>
+                                    </StackPanel.Visibility>
+                                    <TextBox 
                                     Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                                         Path=(ItemsControl.AlternationIndex)}"
                                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -157,7 +160,7 @@
                                     MaxLength="2"
                                     materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                                     TextChanged="WrittenScoresTextChanged"/>
-                                <TextBlock 
+                                    <TextBlock 
                                     Text="{Binding Label, StringFormat={}/ {0}}"
                                     VerticalAlignment="Center" 
                                     HorizontalAlignment="Left"
@@ -165,7 +168,8 @@
                                     TextWrapping="Wrap"
                                     FontWeight="SemiBold"
                                     Margin="1,5,0,0"/>
-                            </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -178,11 +182,9 @@
                     <ColumnDefinition Width="3.5*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Row="1"
-                    Grid.Column="0"
-                    BorderBrush="LightGray"
-                    BorderThickness="0,1,0,0" />
+                
                 <DockPanel
+                    Grid.Row="1"
                     Grid.Column="0"
                     HorizontalAlignment="Center"
                     LastChildFill="False">
@@ -205,9 +207,7 @@
                 </DockPanel>
                 <ItemsControl
                     Grid.Column="1"
-                    AlternationCount="1000"                    
-                    BorderBrush="LightGray"
-                    BorderThickness="0,1,0,0"
+                    AlternationCount="1000"
                     ItemsSource="{Binding PerformanceTasks}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -216,16 +216,19 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal"
+                            <Border BorderBrush="LightGray"
+                                BorderThickness="1,0,1,1">
+                                <StackPanel Orientation="Horizontal"
                                         VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
                                         Margin="2">
-                                <StackPanel.Visibility>
-                                    <MultiBinding Converter="{StaticResource EmptyToVisibilityConverter}">
-                                        <Binding Path="Value"/>
-                                        <Binding Path="Label"/>
-                                    </MultiBinding>
-                                </StackPanel.Visibility>
-                                <TextBox 
+                                    <StackPanel.Visibility>
+                                        <MultiBinding Converter="{StaticResource EmptyToVisibilityConverter}">
+                                            <Binding Path="Value"/>
+                                            <Binding Path="Label"/>
+                                        </MultiBinding>
+                                    </StackPanel.Visibility>
+                                    <TextBox 
                                     Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                                         Path=(ItemsControl.AlternationIndex)}"
                                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -239,7 +242,7 @@
                                     MaxLength="2"
                                     materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                                     TextChanged="PerformanceScoresTextChanged"/>
-                                <TextBlock 
+                                    <TextBlock 
                                     Text="{Binding Label, StringFormat={}/ {0}}"
                                     VerticalAlignment="Center" 
                                     HorizontalAlignment="Left"
@@ -247,7 +250,8 @@
                                     TextWrapping="Wrap"
                                     FontWeight="SemiBold"
                                     Margin="1,5,0,0"/>
-                            </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
