@@ -11,7 +11,7 @@
         FontSize="14"
         FontFamily="Microsoft YaHei UI"
         Icon="pack://application:,,,/icons/appico.ico"
-        Title="MainWindow" Height="500" Width="1000">
+        Title="ECR" Height="500" Width="1000">
     <materialDesign:DialogHost x:Name="RootDialog" CloseOnClickAway="True">
 
         <!-- Dialog Content -->
