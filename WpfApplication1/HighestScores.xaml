@@ -11,6 +11,7 @@
     <UserControl.Resources>
         <local:IndexToQuizLabelConverter x:Key="IndexToQuizLabelConverter" />
         <local:IndexToActivityLabelConverter x:Key="IndexToActivityLabelConverter" />
+        <local:ScoreToEnabledConverter x:Key="ScoreToEnabledConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -51,26 +52,35 @@
                                     HorizontalAlignment="Center"
                                     Margin="5"
                                     >
-                                <TextBlock Text="{Binding
-                                RelativeSource={RelativeSource Mode=FindAncestor,
-                                                                  AncestorType=ContentPresenter},
-                                Path=(ItemsControl.AlternationIndex),
-                                Converter={StaticResource IndexToActivityLabelConverter}}"
-                                Margin="5"/>
+                                <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                                    <Button Content="{Binding
+                                        RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                    AncestorType=ContentPresenter},
+                                        Path=(ItemsControl.AlternationIndex),
+                                        Converter={StaticResource IndexToActivityLabelConverter}}"
+                                        ToolTip="{Binding
+                                        RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                    AncestorType=ContentPresenter},
+                                        Path=(ItemsControl.AlternationIndex),
+                                        Converter={StaticResource IndexToActivityLabelConverter},
+                                        StringFormat='View Scores of WW {0}'}"/>
+
+                                </StackPanel>
                                 <TextBox
-                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
-                                        Path=(ItemsControl.AlternationIndex)}"
-                                Text="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                VerticalAlignment="Top"
-                                materialDesign:HintAssist.Hint="Score"
-                                AcceptsReturn="True"                 
-                                Style="{StaticResource MaterialDesignFilledTextBox}"
-                                TextWrapping="Wrap"
-                                Width="70"
-                                PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
-                                MaxLength="2"
-                                materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
-                                TextChanged="WrittenScoresTextChanged"/>
+                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                            Path=(ItemsControl.AlternationIndex)}"
+                                    Text="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    VerticalAlignment="Top"
+                                    materialDesign:HintAssist.Hint="Score"
+                                    AcceptsReturn="True"                 
+                                    Style="{StaticResource MaterialDesignFilledTextBox}"
+                                    TextWrapping="Wrap"
+                                    Width="70"
+                                    PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                    MaxLength="2"
+                                    materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
+                                    TextChanged="WrittenScoresTextChanged"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -133,26 +143,36 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center"
                                     Margin="5">
-                                <TextBlock Text="{Binding
-                                RelativeSource={RelativeSource Mode=FindAncestor,
-                                                                  AncestorType=ContentPresenter},
-                                Path=(ItemsControl.AlternationIndex),
-                                Converter={StaticResource IndexToActivityLabelConverter}}"
-                                Margin="5"/>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <Button Content="{Binding
+                                          RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                        AncestorType=ContentPresenter},
+                                          Path=(ItemsControl.AlternationIndex),
+                                          Converter={StaticResource IndexToActivityLabelConverter}}"                                        
+                                        IsEnabled="{Binding ., Converter={StaticResource ScoreToEnabledConverter}}"
+                                        ToolTip="{Binding
+                                        RelativeSource={RelativeSource Mode=FindAncestor,
+                                                                    AncestorType=ContentPresenter},
+                                        Path=(ItemsControl.AlternationIndex),
+                                        Converter={StaticResource IndexToActivityLabelConverter},
+                                        StringFormat='View Scores of PT {0}'}"/>
+
+                                </StackPanel>
                                 <TextBox
-                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
-                                    Path=(ItemsControl.AlternationIndex)}"
-                                Text="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                VerticalAlignment="Top"
-                                materialDesign:HintAssist.Hint="Score"
-                                AcceptsReturn="True"                 
-                                Style="{StaticResource MaterialDesignFilledTextBox}"
-                                TextWrapping="Wrap"
-                                Width="70"
-                                PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
-                                MaxLength="2"
-                                materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
-                                TextChanged="PerformanceScoresTextChanged"/>
+                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                        Path=(ItemsControl.AlternationIndex)}"
+                                    Text="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    VerticalAlignment="Top"
+                                    materialDesign:HintAssist.Hint="Score"
+                                    AcceptsReturn="True"                 
+                                    Style="{StaticResource MaterialDesignFilledTextBox}"
+                                    TextWrapping="Wrap"
+                                    Width="70"
+                                    PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                    MaxLength="2"
+                                    materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
+                                    TextChanged="PerformanceScoresTextChanged"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
