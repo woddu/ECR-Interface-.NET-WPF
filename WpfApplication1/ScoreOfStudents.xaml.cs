@@ -40,7 +40,13 @@ namespace WpfApplication1 {
       set { tbHighestScore.Text = "Highest Score: " + (_highestScore = value).ToString(); }
     }
 
-    public uint ColumnIndex { get; set; }
+    private uint _columnIndex;
+    public uint ColumnIndex { 
+      get { return _columnIndex; }
+      set {
+        _columnIndex = value;
+        tbType.Text = tbType.Text + " #" + (_columnIndex + 1).ToString(); }
+      }
 
     public ScoreOfStudents() {
       InitializeComponent();
