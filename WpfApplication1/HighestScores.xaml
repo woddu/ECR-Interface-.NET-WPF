@@ -12,6 +12,8 @@
         <local:IndexToQuizLabelConverter x:Key="IndexToQuizLabelConverter" />
         <local:IndexToActivityLabelConverter x:Key="IndexToActivityLabelConverter" />
         <local:ScoreToEnabledConverter x:Key="ScoreToEnabledConverter"/>
+        <local:WWIndexToToolTipConverter x:Key="WWIndexToToolTipConverter"/>
+        <local:PTIndexToToolTipConverter x:Key="PTIndexToToolTipConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -63,8 +65,11 @@
                                         RelativeSource={RelativeSource Mode=FindAncestor,
                                                                     AncestorType=ContentPresenter},
                                         Path=(ItemsControl.AlternationIndex),
-                                        Converter={StaticResource IndexToActivityLabelConverter},
-                                        StringFormat='View Scores of WW {0}'}"/>
+                                        Converter={StaticResource WWIndexToToolTipConverter}}"
+                                        IsEnabled="{Binding ., Converter={StaticResource ScoreToEnabledConverter}}"
+                                        Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                        Path=(ItemsControl.AlternationIndex)}"
+                                        Click="WrittenWorks_ItemCliked"/>
 
                                 </StackPanel>
                                 <TextBox
@@ -154,9 +159,11 @@
                                         ToolTip="{Binding
                                         RelativeSource={RelativeSource Mode=FindAncestor,
                                                                     AncestorType=ContentPresenter},
-                                        Path=(ItemsControl.AlternationIndex),
-                                        Converter={StaticResource IndexToActivityLabelConverter},
-                                        StringFormat='View Scores of PT {0}'}"/>
+                                        Path=(ItemsControl.AlternationIndex),                                        
+                                        Converter={StaticResource PTIndexToToolTipConverter}}"
+                                        Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                        Path=(ItemsControl.AlternationIndex)}"
+                                        Click="PerformanceTasks_ItemCliked"/>
 
                                 </StackPanel>
                                 <TextBox
