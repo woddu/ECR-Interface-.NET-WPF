@@ -58,6 +58,12 @@ public class WorkbookService : IDisposable {
     new GradeRange (0.00,  3.99,  60 )
   ];
 
+  private readonly static uint _maleStudentStartRow = 13u;
+  private readonly static uint _femaleStudentStartRow = 64u;
+
+  private static uint _maleStudentEndRow = 0u;
+  private static uint _femaleStudentEndRow = 0u;
+
   public readonly static string[] tracks = [
     "Core Subject (All Tracks)",
     "Academic Track (except Immersion)",
@@ -163,6 +169,87 @@ public class WorkbookService : IDisposable {
     FilePath = path;
   }
 
+  public void SetScoresOfItem(uint index, List<string> maleScores, List<string> femaleScores, bool isWrittenWorks = true) {
+    string targetColumn = isWrittenWorks
+        ? ColNumberToName(ColNameToNumber("F") + (int)index)
+        : ColNumberToName(ColNameToNumber("S") + (int)index);
+
+    using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true);
+    WorkbookPart wbPart = doc.WorkbookPart;
+    Sheet sheet = wbPart.Workbook.Sheets
+        .OfType<Sheet>()
+        .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+
+    if (sheet == null) return;
+
+    WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
+
+    // Write male scores
+    for (int i = 0; i < maleScores.Count; i++) {
+      uint rowIndex = (uint)(_maleStudentStartRow + i);
+      string cellRef = targetColumn + rowIndex;
+      InsertCellValue(wsPart.Worksheet.GetFirstChild<SheetData>(), cellRef, maleScores[i]);
+    }
+
+    // Write female scores
+    for (int i = 0; i < femaleScores.Count; i++) {
+      uint rowIndex = (uint)(_femaleStudentStartRow + i);
+      string cellRef = targetColumn + rowIndex;
+      InsertCellValue(wsPart.Worksheet.GetFirstChild<SheetData>(), cellRef, femaleScores[i]);
+    }
+
+    wsPart.Worksheet.Save();
+  }
+
+
+  public (List<string> male, List<string> female) GetScoresOfItem(uint index, bool isWrittenWorks = true) {
+    List<string> male = new List<string>();
+    List<string> female = new List<string>();
+
+    string targetColumn;
+    if (isWrittenWorks) {
+      targetColumn = ColNumberToName(ColNameToNumber("F") + (int)index);
+    } else {
+      targetColumn = ColNumberToName(ColNameToNumber("S") + (int)index);
+    }
+
+    using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true);
+
+    WorkbookPart wbPart = doc.WorkbookPart;
+    Sheet sheet = wbPart.Workbook.Sheets
+        .OfType<Sheet>()
+        .FirstOrDefault(s => s.Name == (Quarter1 ? requiredSheetNames[1] : requiredSheetNames[2]));
+
+    if (sheet == null) return (male, female);
+
+    WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
+    SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
+
+    foreach (Row row in sheetData.Elements<Row>()) {
+      if (row.RowIndex >= _maleStudentStartRow && row.RowIndex <= _maleStudentEndRow) {
+        Cell cell = row.Elements<Cell>()
+                       .FirstOrDefault(c => c.CellReference.Value.StartsWith(targetColumn));
+        if (cell != null) {
+          string value = GetCellValue(doc, cell);
+          male.Add(value);
+        }
+      }
+    }
+
+    foreach (Row row in sheetData.Elements<Row>()) {
+      if (row.RowIndex >= _femaleStudentStartRow && row.RowIndex <= _femaleStudentEndRow) {
+        Cell cell = row.Elements<Cell>()
+                       .FirstOrDefault(c => c.CellReference.Value.StartsWith(targetColumn));
+        if (cell != null) {
+          string value = GetCellValue(doc, cell);
+          female.Add(value);
+        }
+      }
+    }
+
+    return (male, female);
+  }
+
   public void ChangeTrack(int index) {
     using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true);
 
@@ -211,7 +298,7 @@ public class WorkbookService : IDisposable {
 
   public static List<string> ReadNames(SpreadsheetDocument doc, bool male = true) {
     string columnLetter = "B";
-    uint startRow = male ? 13u : 64u;
+    uint startRow = male ? _maleStudentStartRow : _femaleStudentStartRow;
     uint endRow = male ? 37u : 88u;
 
     var values = new List<string>();
@@ -226,6 +313,9 @@ public class WorkbookService : IDisposable {
     WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
     SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
 
+    // get the row of the last student
+
+
     for (uint rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
       string cellRef = $"{columnLetter}{rowIndex}";
       Cell cell = sheetData.Descendants<Cell>()
@@ -234,6 +324,8 @@ public class WorkbookService : IDisposable {
       string val = GetCellValue(doc, cell);
       if (!string.IsNullOrWhiteSpace(val)) {
         values.Add(val);
+        if (male)_maleStudentEndRow = rowIndex;
+        else _femaleStudentEndRow = rowIndex;
       }
     }
 
@@ -242,7 +334,7 @@ public class WorkbookService : IDisposable {
   
   public List<string> AppendAndSortNames(string newValue, bool male = true) {
     string columnLetter = "B";
-    uint startRow = male ? 13u : 64u;
+    uint startRow = male ? _maleStudentStartRow : _femaleStudentStartRow;
     uint endRow = male ? 37u : 88u;
 
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
@@ -694,24 +786,37 @@ public class WorkbookService : IDisposable {
   }
 
 
-  private void InsertCellValue(SheetData sheetData, string cellReference, string value) {
+  private void InsertCellValue(SheetData sheetData, string cellReference, string value, bool isNumeric = true) {
     string rowNumber = new string(cellReference.Where(char.IsDigit).ToArray());
-    Row row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == uint.Parse(rowNumber));
+    uint rowIndex = uint.Parse(rowNumber);
 
+    Row row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == rowIndex);
     if (row == null) {
-      row = new Row() { RowIndex = uint.Parse(rowNumber) };
+      row = new Row() { RowIndex = rowIndex };
       sheetData.Append(row);
     }
 
-    Cell cell = row.Elements<Cell>().FirstOrDefault(c => c.CellReference == cellReference);
+    Cell cell = row.Elements<Cell>()
+                   .FirstOrDefault(c => c.CellReference?.Value == cellReference);
+
     if (cell == null) {
+      // Insert in correct order
+      Cell refCell = null;
+      foreach (Cell existingCell in row.Elements<Cell>()) {
+        if (string.Compare(existingCell.CellReference.Value, cellReference, true) > 0) {
+          refCell = existingCell;
+          break;
+        }
+      }
+
       cell = new Cell() { CellReference = cellReference };
-      row.Append(cell);
+      row.InsertBefore(cell, refCell);
     }
 
     cell.CellValue = new CellValue(value);
-    cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+    cell.DataType = new EnumValue<CellValues>(isNumeric ? CellValues.Number : CellValues.String);
   }
+
 
   public void Dispose() {
     // Nothing to dispose unless you keep a persistent open document
