@@ -36,30 +36,81 @@
 
                 <!-- Male students -->
                 <TextBlock Text="Male Students" FontWeight="Bold" Margin="5"/>
-                <ItemsControl ItemsSource="{Binding MaleStudentsView}">
+                <ItemsControl ItemsSource="{Binding MaleStudentsView}"
+                    AlternationCount="1000">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="2">
-                                <TextBlock Text="{Binding Name}" Width="100"/>
-                                <TextBox Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
-                                         Width="50"
-                                         TextChanged="MaleStudentScoreTextChanged"/>
-                            </StackPanel>
+                            <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" >
+                            <Grid Margin="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <!-- Name column -->
+                                    <ColumnDefinition Width="*"/>
+                                    <!-- Score column -->
+                                </Grid.ColumnDefinitions>
+
+                                <!-- First column: Name -->
+                                <TextBlock Text="{Binding Name}"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,8,0"/>
+
+                                <!-- Second column: Score -->
+                                    <TextBox Grid.Column="1"
+                                    Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
+                                    materialDesign:HintAssist.Hint="Score"
+                                    AcceptsReturn="True"                 
+                                    Style="{StaticResource MaterialDesignFilledTextBox}"
+                                    TextWrapping="Wrap"
+                                    Width="70"
+                                    PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                    MaxLength="2"
+                                    materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"                                        
+                                    TextChanged="MaleStudentScoreTextChanged"
+                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                    Path=(ItemsControl.AlternationIndex)}"/>
+                                </Grid>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
+
                 <!-- Female students -->
                 <TextBlock Text="Female Students" FontWeight="Bold" Margin="5"/>
-                <ItemsControl ItemsSource="{Binding FemaleStudentsView}">
+                <ItemsControl ItemsSource="{Binding FemaleStudentsView}"
+>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="2">
-                                <TextBlock Text="{Binding Name}" Width="100"/>
-                                <TextBox Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
-                                         Width="50"
-                                         TextChanged="FemaleStudentScoreTextChanged"/>
-                            </StackPanel>
+                            <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" >
+                                <Grid Margin="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <!-- Name column -->
+                                        <ColumnDefinition Width="*"/>
+                                        <!-- Score column -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- First column: Name -->
+                                    <TextBlock Text="{Binding Name}"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,8,0"/>
+
+                                    <!-- Second column: Score -->
+                                    <TextBox Grid.Column="1"
+                                    Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
+                                    materialDesign:HintAssist.Hint="Score"
+                                    AcceptsReturn="True"                 
+                                    Style="{StaticResource MaterialDesignFilledTextBox}"
+                                    TextWrapping="Wrap"
+                                    Width="70"
+                                    PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                    MaxLength="2"
+                                    materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"                                        
+                                    TextChanged="MaleStudentScoreTextChanged"
+                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                    Path=(ItemsControl.AlternationIndex)}"/>
+                                </Grid>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -70,13 +121,19 @@
             VerticalAlignment="Center"
             HorizontalAlignment="Center">
             <TextBlock
-                    x:Name="tbWrittenWorks"
-                    Text="Written Works" 
+                    x:Name="tbType"                    
                     VerticalAlignment="Center" 
                     HorizontalAlignment="Left"
                     Padding="0,16"
                     Style="{StaticResource MaterialDesignTitleLargeTextBlock}"
                     TextWrapping="Wrap"/>
+            <TextBlock
+                x:Name="tbHighestScore"                    
+                VerticalAlignment="Center" 
+                HorizontalAlignment="Left"
+                Padding="0,16"
+                Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                TextWrapping="Wrap"/>
             <Button x:Name="btnSaveScores" 
                 Content="Save"
                 IsEnabled="False"
