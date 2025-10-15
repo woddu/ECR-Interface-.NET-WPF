@@ -1,10 +1,12 @@
 ﻿
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +23,7 @@ namespace WpfApplication1 {
     private readonly SamplePage studentsPage = new SamplePage();
     private readonly HighestScores highestScoresPage = new HighestScores();
     private readonly StudentDetails studentDetails = new StudentDetails();
+    private readonly ScoreOfStudents scoreOfStudents = new ScoreOfStudents();
 
     public MainWindow() {
       InitializeComponent();
@@ -37,16 +40,125 @@ namespace WpfApplication1 {
       highestScoresPage.SaveExamClicked += HighestScores_SaveExamClicked;
       highestScoresPage.SaveWrittenWorksClicked += HighestScores_SaveWrittenWorksClicked;
       highestScoresPage.SavePerformanceTasksClicked += HighestScores_SavePerformanceTasksClicked;
+      highestScoresPage.HighestScoreItemClicked += HighestScores_HighestScoreItemClicked;
 
       studentDetails.SaveExamClicked += StudentDetails_SaveExamClicked;
       studentDetails.SaveWrittenWorksClicked += StudentDetails_SaveWrittenWorksClicked;
       studentDetails.SavePerformanceTasksClicked += StudentDetails_SavePerformanceTasksClicked;
 
+      scoreOfStudents.SaveScores += ScoreOfStudents_SaveScoresClicked;
+    }
+
+    private async void ScoreOfStudents_SaveScoresClicked(object sender, EventArgs e) {
+      try {
+        SetLoading(true);
+        (List<string> maleStudents, List<string> femaleStudents) = await Task.Run(() => {
+          _workbookService.SetScoresOfItem(            
+            scoreOfStudents.ColumnIndex,
+            scoreOfStudents.MaleStudentsWithScores.Select(s => s.Score).ToList(),
+            scoreOfStudents.FemaleStudentsWithScores.Select(s => s.Score).ToList(),
+            scoreOfStudents.Type == "Written Works"
+            );
+          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(scoreOfStudents.ColumnIndex, scoreOfStudents.Type == "Written Works");
+          return (maleStudentsWS, femaleStudentsWS);
+        });
+
+        List<StudentWithScore> maleStudentWithScores = scoreOfStudents.MaleStudentsWithScores.ToList();
+        List<StudentWithScore> femaleStudentWithScores = scoreOfStudents.FemaleStudentsWithScores.ToList();
+
+        for (int i = 0; i < maleStudents.Count; i++) {
+          maleStudentWithScores[i].Score = maleStudents[i];
+        }
+
+        for (int i = 0; i < femaleStudents.Count; i++) {
+          femaleStudentWithScores[i].Score = femaleStudents[i];
+        }
+
+        scoreOfStudents.MaleStudentsWithScores.Clear();
+        scoreOfStudents.FemaleStudentsWithScores.Clear();
+
+        if (scoreOfStudents.Type == "Written Works")
+          scoreOfStudents.Type = "Written Works";
+        else
+          scoreOfStudents.Type = "Performance Tasks";
+
+        scoreOfStudents.HighestScore = scoreOfStudents.HighestScore;
+
+        scoreOfStudents.ColumnIndex = scoreOfStudents.ColumnIndex;
+
+        maleStudentWithScores.ForEach(s => {
+          scoreOfStudents.MaleStudentsWithScores.Add(s);
+          scoreOfStudents.InitialMaleStudentsScores.Add(s.Score);
+        });
+        femaleStudentWithScores.ForEach(s => {
+          scoreOfStudents.FemaleStudentsWithScores.Add(s);
+          scoreOfStudents.InitialFemaleStudentsScores.Add(s.Score);
+        });
+
+        MainContent.Content = scoreOfStudents;
+
+        rbtnScores.IsChecked = false;
+
+        SetLoading(false);
+
+        SetLoading(false);
+      } catch (Exception ex) {
+        ShowError("Error", ex.Message);
+      }
+    }
+
+    private async void HighestScores_HighestScoreItemClicked(uint index, bool isWrittenWork, int highestScore) {
+      try {
+        SetLoading(true);
+        (List<string> maleStudents, List<string> femaleStudents) = await Task.Run(() => {
+          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(index, isWrittenWork);
+          return (maleStudentsWS, femaleStudentsWS);
+        });
+
+        List<StudentWithScore> maleStudentWithScores = scoreOfStudents.MaleStudentsWithScores.ToList();
+        List<StudentWithScore> femaleStudentWithScores = scoreOfStudents.FemaleStudentsWithScores.ToList();
+
+        for (int i = 0; i < maleStudents.Count; i++) {
+          maleStudentWithScores[i].Score = maleStudents[i];
+        }
+
+        for (int i = 0; i < femaleStudents.Count; i++) {
+          femaleStudentWithScores[i].Score = femaleStudents[i];
+        }
+
+        scoreOfStudents.MaleStudentsWithScores.Clear();
+        scoreOfStudents.FemaleStudentsWithScores.Clear();
+
+        if (isWrittenWork)
+          scoreOfStudents.Type = "Written Works";
+        else
+          scoreOfStudents.Type = "Performance Tasks";
+
+        scoreOfStudents.HighestScore = highestScore;
+
+        scoreOfStudents.ColumnIndex = index;
+
+        maleStudentWithScores.ForEach(s => {
+          scoreOfStudents.MaleStudentsWithScores.Add(s);
+          scoreOfStudents.InitialMaleStudentsScores.Add(s.Score);
+        });
+        femaleStudentWithScores.ForEach(s => {
+          scoreOfStudents.FemaleStudentsWithScores.Add(s);
+          scoreOfStudents.InitialFemaleStudentsScores.Add(s.Score);
+        });
+
+        MainContent.Content = scoreOfStudents;
+
+        rbtnScores.IsChecked = false;
+
+        SetLoading(false);
+      } catch (Exception ex) {
+        ShowError("Error", ex.Message);
+      }
     }
 
     private async void HomePage_Track_Chosen(object sender, int index) {
       try {
-        Debug.WriteLine("Index: " + index);
         if (WorkbookService.tracks[index] != _workbookService.Track) {
           SetLoading(true);
           await Task.Run(() => {
@@ -116,6 +228,7 @@ namespace WpfApplication1 {
 
     private async void StudentDetails_SaveWrittenWorksClicked(object sender, EventArgs e) {
       try {
+        SetLoading(true);
         (List<string> writtenWorksScores, string grade, int transmutedGrade) = await Task.Run(() => {
           _workbookService.EditStudentScore(
             studentDetails.WrittenWorks.Select(p => p.Value).ToList(),
@@ -139,6 +252,7 @@ namespace WpfApplication1 {
 
         studentDetails.SetGrade(transmutedGrade.ToString());
         studentDetails.SetSaveWrittenWorksBtnEnabled(false);
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -146,6 +260,7 @@ namespace WpfApplication1 {
 
     private async void StudentDetails_SavePerformanceTasksClicked(object sender, EventArgs e) {
       try {
+        SetLoading(true);
         (List<string> performanceTasksScores, string grade, int transmutedGrade) = await Task.Run(() => {
           _workbookService.EditStudentScore(
             studentDetails.PerformanceTasks.Select(p => p.Value).ToList(),
@@ -169,7 +284,8 @@ namespace WpfApplication1 {
         }
 
         studentDetails.SetGrade(transmutedGrade.ToString());
-        studentDetails.SetSavePerformanceTasksBtnEnabled(false);
+        studentDetails.SetSavePerformanceTasksBtnEnabled(false);       
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -177,11 +293,13 @@ namespace WpfApplication1 {
 
     private async void HighestScores_SaveExamClicked(object sender, EventArgs e) {
       try {
+        SetLoading(true);
         await Task.Run(() => {
           _workbookService.EditExamScore(highestScoresPage.Exam);
         });
         highestScoresPage.Exam = _workbookService.Exam;
         highestScoresPage.SetExamBtnEnabled(false);
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -189,12 +307,14 @@ namespace WpfApplication1 {
 
     private async void HighestScores_SaveWrittenWorksClicked(object sender, EventArgs e) {
       try {
+        SetLoading(true);
         await Task.Run(() => {
           _workbookService.EditHighestPossibleScore(highestScoresPage.WrittenWorks.ToList(), true);
         });
 
         highestScoresPage.WrittenWorks.Clear();
         _workbookService.WrittenWorks.ForEach(score => highestScoresPage.WrittenWorks.Add(score));
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -202,12 +322,14 @@ namespace WpfApplication1 {
 
     private async void HighestScores_SavePerformanceTasksClicked(object sender, EventArgs e) {
       try {
+        SetLoading(true);
         await Task.Run(() => {
           _workbookService.EditHighestPossibleScore(highestScoresPage.PerformanceTasks.ToList(), false);
         });
 
         highestScoresPage.PerformanceTasks.Clear();
         _workbookService.PerformanceTasks.ForEach(score => highestScoresPage.PerformanceTasks.Add(score));
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -215,6 +337,7 @@ namespace WpfApplication1 {
 
     private async void StudentsPage_NameClicked(object sender, (uint row, string name) tuple) {
       try {
+        SetLoading(true);
         studentDetails.OriginalWrittenWork.Clear();
         studentDetails.OriginalPerformanceTask.Clear();
         studentDetails.WrittenWorks.Clear();
@@ -250,6 +373,7 @@ namespace WpfApplication1 {
         }
         rbtnStudents.IsChecked = false;
         MainContent.Content = studentDetails;
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -318,6 +442,12 @@ namespace WpfApplication1 {
         studentsPage.FemaleNames.Clear();
         femaleNames.ForEach(name => studentsPage.FemaleNames.Add(name));
 
+        scoreOfStudents.MaleStudentsWithScores.Clear();
+        maleNames.ForEach(name => scoreOfStudents.MaleStudentsWithScores.Add(new StudentWithScore { Name = name, Score = "0" }));
+
+        scoreOfStudents.FemaleStudentsWithScores.Clear();
+        femaleNames.ForEach(name => scoreOfStudents.FemaleStudentsWithScores.Add(new StudentWithScore { Name = name, Score = "0" }));
+
         highestScoresPage.WrittenWorks.Clear();
         _workbookService.WrittenWorks.ForEach(score => highestScoresPage.WrittenWorks.Add(score));
 
@@ -347,12 +477,14 @@ namespace WpfApplication1 {
 
     private async void StudentsPage_AddMale(object sender, string newName) {
       try {
+        SetLoading(true);
         studentsPage.EnableAddButton(false);
         studentsPage.MaleNames.Clear();
         await Task.Run(() => {
           _workbookService.AppendAndSortNames(newName).ForEach(name => studentsPage.MaleNames.Add(name));
         });
         studentsPage.EnableAddButton();
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
@@ -360,12 +492,14 @@ namespace WpfApplication1 {
 
     private async void StudentsPage_AddFemale(object sender, string newName) {
       try {
+        SetLoading(true);
         studentsPage.EnableAddButton(false);
         studentsPage.FemaleNames.Clear();
         await Task.Run(() => {
           _workbookService.AppendAndSortNames(newName, false).ForEach(name => studentsPage.FemaleNames.Add(name));
         });
         studentsPage.EnableAddButton();
+        SetLoading(false);
       } catch (Exception ex) {
         ShowError("Error", ex.Message);
       }
