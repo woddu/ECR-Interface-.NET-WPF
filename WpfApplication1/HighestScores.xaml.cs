@@ -31,10 +31,22 @@ namespace WpfApplication1 {
     public EventHandler SaveExamClicked;
     public EventHandler SaveWrittenWorksClicked;
     public EventHandler SavePerformanceTasksClicked;
-
+    public Action<uint, bool, int> HighestScoreItemClicked;
     public HighestScores() {
       InitializeComponent();
       DataContext = this;
+    }
+
+    private void WrittenWorks_ItemCliked(object sender, System.Windows.RoutedEventArgs e) {
+      if (sender is Button btn) {
+        HighestScoreItemClicked?.Invoke(uint.Parse(btn.Tag.ToString()), true, int.Parse(WrittenWorks[int.Parse(btn.Tag.ToString())]));
+      }
+    }
+    private void PerformanceTasks_ItemCliked(object sender, System.Windows.RoutedEventArgs e) {
+      if (sender is Button btn) {
+
+        HighestScoreItemClicked?.Invoke(uint.Parse(btn.Tag.ToString()), false, int.Parse(PerformanceTasks[int.Parse(btn.Tag.ToString())]));
+      }
     }
 
     public void SetWrittenWorksPercentage(string percentage) => tbWrittenWorks.Text = "Writtent Works : " + percentage;
