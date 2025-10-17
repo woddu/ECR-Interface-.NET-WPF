@@ -26,11 +26,19 @@ namespace WpfApplication1 {
 
     public EventHandler SaveScores;
 
-    private string _type;
-    public string Type 
+    private ScoreType _type;
+    public ScoreType Type 
     {
       get { return _type; }
-      set { tbType.Text = _type = value; }
+      set {
+        _type = value;
+        tbType.Text = _type switch {
+          ScoreType.WrittenWorks => "Written Works",
+          ScoreType.PerformanceTasks => "Performance Tasks",
+          ScoreType.Exam => "Exam",
+          _ => "Unknown"
+        };
+      }
     }
 
     private int _highestScore;
@@ -117,4 +125,5 @@ namespace WpfApplication1 {
     public string Name { get; set; }
     public string Score { get; set; }
   }
+
 }
