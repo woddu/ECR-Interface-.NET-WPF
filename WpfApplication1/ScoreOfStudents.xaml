@@ -35,7 +35,10 @@
                 </DockPanel>
 
                 <!-- Male students -->
-                <TextBlock Text="Male Students" FontWeight="Bold" Margin="5"/>
+                <TextBlock  Text="Male Students" 
+                            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                            FontWeight="Black"
+                            Margin="5"/>
                 <ItemsControl ItemsSource="{Binding MaleStudentsView}"
                     AlternationCount="1000">
                     <ItemsControl.ItemTemplate>
@@ -76,7 +79,10 @@
 
 
                 <!-- Female students -->
-                <TextBlock Text="Female Students" FontWeight="Bold" Margin="5"/>
+                <TextBlock Text="Female Students" 
+                           Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+                           FontWeight="Black"
+                           Margin="5,10,5,5"/>
                 <ItemsControl ItemsSource="{Binding FemaleStudentsView}"
 >
                     <ItemsControl.ItemTemplate>
