@@ -58,8 +58,8 @@ public class WorkbookService : IDisposable {
     new GradeRange (0.00,  3.99,  60 )
   ];
 
-  private readonly static uint _maleStudentStartRow = 13u;
-  private readonly static uint _femaleStudentStartRow = 64u;
+  private static uint _maleStudentStartRow = 13u;
+  private static uint _femaleStudentStartRow = 64u;
 
   private static uint _maleStudentEndRow = 0u;
   private static uint _femaleStudentEndRow = 0u;
@@ -298,23 +298,64 @@ public class WorkbookService : IDisposable {
 
   public static List<string> ReadNames(SpreadsheetDocument doc, bool male = true) {
     string columnLetter = "B";
-    uint startRow = male ? _maleStudentStartRow : _femaleStudentStartRow;
-    uint endRow = male ? 37u : 88u;
 
     var values = new List<string>();
 
     WorkbookPart wbPart = doc.WorkbookPart;
     Sheet sheet = wbPart.Workbook.Sheets
         .OfType<Sheet>()
-        .FirstOrDefault(s => s.Name == requiredSheetNames[0]);
+        .FirstOrDefault(s => s.Name == requiredSheetNames[1]);
 
     if (sheet == null) return values;
 
     WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
     SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
 
-    // get the row of the last student
+    foreach (Row row in sheetData.Elements<Row>()) {
+      // Build the cell reference for column B
+      string cellRef = $"B{row.RowIndex}";
+      Cell cell = row.Elements<Cell>()
+                     .FirstOrDefault(c => c.CellReference == cellRef);
 
+      string val = GetCellValue(doc, cell);
+
+      if (string.Equals(val, "male", StringComparison.OrdinalIgnoreCase)) {
+        _maleStudentStartRow = row.RowIndex + 1;
+      } else if (string.Equals(val, "female", StringComparison.OrdinalIgnoreCase)) {
+        _femaleStudentStartRow = row.RowIndex + 1;
+      }
+    }
+
+    sheet = wbPart.Workbook.Sheets
+        .OfType<Sheet>()
+        .FirstOrDefault(s => s.Name == requiredSheetNames[0]);
+
+    if (sheet == null) return values;
+
+    wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
+    sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
+
+    uint maleStartRow = 13u, femaleStartRow = 64u;
+    uint endRow;
+
+    foreach (Row row in sheetData.Elements<Row>()) {
+      // Build the cell reference for column B
+      string cellRef = $"B{row.RowIndex}";
+      Cell cell = row.Elements<Cell>()
+                     .FirstOrDefault(c => c.CellReference == cellRef);
+
+      string val = GetCellValue(doc, cell);
+
+
+      if (string.Equals(val, "male", StringComparison.OrdinalIgnoreCase)) {
+        maleStartRow = row.RowIndex + 1;
+      } else if (string.Equals(val, "female", StringComparison.OrdinalIgnoreCase)) {
+        femaleStartRow = row.RowIndex + 1;
+      }
+    }
+
+    uint startRow = male ? maleStartRow : femaleStartRow;
+    endRow = male ? femaleStartRow - 2 : femaleStartRow + 70;
 
     for (uint rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
       string cellRef = $"{columnLetter}{rowIndex}";
