@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
+namespace WpfApplication1;
+
 public class WorkbookService : IDisposable {
   private record GradeRange(
     double Min,
@@ -58,11 +60,13 @@ public class WorkbookService : IDisposable {
     new GradeRange (0.00,  3.99,  60 )
   ];
 
-  private static uint _maleStudentStartRow = 13u;
-  private static uint _femaleStudentStartRow = 64u;
+  private static uint _maleScoresStartRow = 0u;
+  private static uint _femaleScoresStartRow = 0u;
+  private static uint _maleNamesStartRow = 0u;
+  private static uint _femaleNamesStartRow = 0u;
 
-  private static uint _maleStudentEndRow = 0u;
-  private static uint _femaleStudentEndRow = 0u;
+  private static uint _maleStudentCount = 0u;
+  private static uint _femaleStudentCount = 0u;
 
   public readonly static string[] tracks = [
     "Core Subject (All Tracks)",
@@ -169,10 +173,13 @@ public class WorkbookService : IDisposable {
     FilePath = path;
   }
 
-  public void SetScoresOfItem(uint index, List<string> maleScores, List<string> femaleScores, bool isWrittenWorks = true) {
-    string targetColumn = isWrittenWorks
-        ? ColNumberToName(ColNameToNumber("F") + (int)index)
-        : ColNumberToName(ColNameToNumber("S") + (int)index);
+  public void SetScoresOfItem(uint index, List<string> maleScores, List<string> femaleScores, ScoreType scoreType = ScoreType.WrittenWorks) {
+    string targetColumn = scoreType switch {
+      ScoreType.WrittenWorks => ColNumberToName(ColNameToNumber("F") + (int)index),
+      ScoreType.PerformanceTasks => ColNumberToName(ColNameToNumber("S") + (int)index),
+      ScoreType.Exam => ColNumberToName(ColNameToNumber("AF")),
+      _ => throw new ArgumentOutOfRangeException(nameof(scoreType))
+    };
 
     using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true);
     WorkbookPart wbPart = doc.WorkbookPart;
@@ -186,32 +193,45 @@ public class WorkbookService : IDisposable {
 
     // Write male scores
     for (int i = 0; i < maleScores.Count; i++) {
-      uint rowIndex = (uint)(_maleStudentStartRow + i);
+      uint rowIndex = (uint)(_maleScoresStartRow + i);
       string cellRef = targetColumn + rowIndex;
       InsertCellValue(wsPart.Worksheet.GetFirstChild<SheetData>(), cellRef, maleScores[i]);
     }
 
     // Write female scores
     for (int i = 0; i < femaleScores.Count; i++) {
-      uint rowIndex = (uint)(_femaleStudentStartRow + i);
+      uint rowIndex = (uint)(_femaleScoresStartRow + i);
       string cellRef = targetColumn + rowIndex;
       InsertCellValue(wsPart.Worksheet.GetFirstChild<SheetData>(), cellRef, femaleScores[i]);
     }
 
+    // Force recalculation if needed
+    var calcProps = wbPart.Workbook.CalculationProperties;
+    if (calcProps == null) {
+      calcProps = new CalculationProperties();
+      wbPart.Workbook.Append(calcProps);
+    }
+    calcProps.FullCalculationOnLoad = true;
+    calcProps.ForceFullCalculation = true;
+    calcProps.CalculationOnSave = true;
     wsPart.Worksheet.Save();
+    wbPart.Workbook.Save();
+
   }
 
 
-  public (List<string> male, List<string> female) GetScoresOfItem(uint index, bool isWrittenWorks = true) {
+  public (List<string> male, List<string> female) GetScoresOfItem(uint index, ScoreType scoreType = ScoreType.WrittenWorks) {
     List<string> male = new List<string>();
     List<string> female = new List<string>();
 
     string targetColumn;
-    if (isWrittenWorks) {
-      targetColumn = ColNumberToName(ColNameToNumber("F") + (int)index);
-    } else {
-      targetColumn = ColNumberToName(ColNameToNumber("S") + (int)index);
-    }
+    targetColumn = scoreType switch {
+      ScoreType.WrittenWorks  => ColNumberToName(ColNameToNumber("F") + (int)index),
+      ScoreType.PerformanceTasks  => ColNumberToName(ColNameToNumber("S") + (int)index),
+      ScoreType.Exam => ColNumberToName(ColNameToNumber("AF")),
+      _ => throw new ArgumentOutOfRangeException(nameof(scoreType))
+    };
+
 
     using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true);
 
@@ -226,7 +246,7 @@ public class WorkbookService : IDisposable {
     SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
 
     foreach (Row row in sheetData.Elements<Row>()) {
-      if (row.RowIndex >= _maleStudentStartRow && row.RowIndex <= _maleStudentEndRow) {
+      if (row.RowIndex >= _maleScoresStartRow && row.RowIndex < (_maleScoresStartRow + _maleStudentCount)) {
         Cell cell = row.Elements<Cell>()
                        .FirstOrDefault(c => c.CellReference.Value.StartsWith(targetColumn));
         if (cell != null) {
@@ -236,8 +256,9 @@ public class WorkbookService : IDisposable {
       }
     }
 
+    Debug.WriteLine("Start: " + _femaleScoresStartRow + " Count: " + _femaleStudentCount + " End :" + (_femaleScoresStartRow + _femaleStudentCount));
     foreach (Row row in sheetData.Elements<Row>()) {
-      if (row.RowIndex >= _femaleStudentStartRow && row.RowIndex <= _femaleStudentEndRow) {
+      if (row.RowIndex >= _femaleScoresStartRow && row.RowIndex < (_femaleScoresStartRow + _femaleStudentCount)) {
         Cell cell = row.Elements<Cell>()
                        .FirstOrDefault(c => c.CellReference.Value.StartsWith(targetColumn));
         if (cell != null) {
@@ -289,24 +310,57 @@ public class WorkbookService : IDisposable {
 
   public (List<string> maleNames, List<string> femaleNames) ReadAllNames() {
     using SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, false);
-    var maleNames = ReadNames(doc, true);
-    var femaleNames = ReadNames(doc, false);
-    ReadHighestPossibleScores(doc);    
-
-    return (maleNames, femaleNames);
-  }
-
-  public static List<string> ReadNames(SpreadsheetDocument doc, bool male = true) {
-    string columnLetter = "B";
-
-    var values = new List<string>();
 
     WorkbookPart wbPart = doc.WorkbookPart;
     Sheet sheet = wbPart.Workbook.Sheets
         .OfType<Sheet>()
         .FirstOrDefault(s => s.Name == requiredSheetNames[1]);
 
-    if (sheet == null) return values;
+    if (sheet == null) return ([], []);
+
+    WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
+    SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
+
+    foreach (Row row in sheetData.Elements<Row>()) {
+      // Build the cell reference for column A
+      string cellRef = $"A{row.RowIndex}";
+      Cell cell = row.Elements<Cell>()
+                     .FirstOrDefault(c => c.CellReference == cellRef);
+
+      string val = GetCellValue(doc, cell);
+
+      if (string.Equals(val.Trim(), "male", StringComparison.OrdinalIgnoreCase)) {
+        _maleScoresStartRow = (uint)row.RowIndex + 1u;
+      } else if (string.Equals(val.Trim(), "female", StringComparison.OrdinalIgnoreCase)) {
+        _femaleScoresStartRow = (uint)row.RowIndex + 1u;
+      }
+    }
+
+    if (_maleStudentCount == 0u || _femaleStudentCount == 0u) {
+
+
+    }
+
+    Debug.WriteLine("femalescores start row" + _femaleScoresStartRow);
+
+    var (maleNames, femaleNames) = ReadNames(doc);
+    ReadHighestPossibleScores(doc);    
+
+    return (maleNames, femaleNames);
+  }
+
+  public static (List<string> maleNames, List<string> femaleNames) ReadNames(SpreadsheetDocument doc) {
+    string columnLetter = "B";
+
+    var males = new List<string>();
+    var females = new List<string>();
+
+    WorkbookPart wbPart = doc.WorkbookPart;
+    Sheet sheet = wbPart.Workbook.Sheets
+        .OfType<Sheet>()
+        .FirstOrDefault(s => s.Name == requiredSheetNames[0]);
+
+    if (sheet == null) return (males, females);
 
     WorksheetPart wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
     SheetData sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
@@ -319,64 +373,49 @@ public class WorkbookService : IDisposable {
 
       string val = GetCellValue(doc, cell);
 
-      if (string.Equals(val, "male", StringComparison.OrdinalIgnoreCase)) {
-        _maleStudentStartRow = row.RowIndex + 1;
-      } else if (string.Equals(val, "female", StringComparison.OrdinalIgnoreCase)) {
-        _femaleStudentStartRow = row.RowIndex + 1;
+
+      if (string.Equals(val.Trim(), "male", StringComparison.OrdinalIgnoreCase)) {
+        _maleNamesStartRow = row.RowIndex + 1;
+      } else if (string.Equals(val.Trim(), "female", StringComparison.OrdinalIgnoreCase)) {
+        _femaleNamesStartRow = row.RowIndex + 1;
       }
     }
 
-    sheet = wbPart.Workbook.Sheets
-        .OfType<Sheet>()
-        .FirstOrDefault(s => s.Name == requiredSheetNames[0]);
-
-    if (sheet == null) return values;
-
-    wsPart = (WorksheetPart)wbPart.GetPartById(sheet.Id);
-    sheetData = wsPart.Worksheet.GetFirstChild<SheetData>();
-
-    uint maleStartRow = 13u, femaleStartRow = 64u;
-    uint endRow;
-
-    foreach (Row row in sheetData.Elements<Row>()) {
-      // Build the cell reference for column B
-      string cellRef = $"B{row.RowIndex}";
-      Cell cell = row.Elements<Cell>()
-                     .FirstOrDefault(c => c.CellReference == cellRef);
-
-      string val = GetCellValue(doc, cell);
-
-
-      if (string.Equals(val, "male", StringComparison.OrdinalIgnoreCase)) {
-        maleStartRow = row.RowIndex + 1;
-      } else if (string.Equals(val, "female", StringComparison.OrdinalIgnoreCase)) {
-        femaleStartRow = row.RowIndex + 1;
-      }
-    }
-
-    uint startRow = male ? maleStartRow : femaleStartRow;
-    endRow = male ? femaleStartRow - 2 : femaleStartRow + 70;
-
-    for (uint rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+    var maleEndRow = _femaleNamesStartRow - 2;
+    var femaleEndRow = _femaleNamesStartRow + 70;
+    _maleStudentCount = 0u;
+    for (uint rowIndex = _maleNamesStartRow; rowIndex <= maleEndRow; rowIndex++) {
       string cellRef = $"{columnLetter}{rowIndex}";
       Cell cell = sheetData.Descendants<Cell>()
                            .FirstOrDefault(c => c.CellReference == cellRef);
 
       string val = GetCellValue(doc, cell);
       if (!string.IsNullOrWhiteSpace(val)) {
-        values.Add(val);
-        if (male)_maleStudentEndRow = rowIndex;
-        else _femaleStudentEndRow = rowIndex;
+        males.Add(val);
+        _maleStudentCount++;
+      }
+    }
+    _femaleStudentCount = 0u;
+    for (uint rowIndex = _femaleNamesStartRow; rowIndex <= femaleEndRow; rowIndex++) {
+      string cellRef = $"{columnLetter}{rowIndex}";
+      Cell cell = sheetData.Descendants<Cell>()
+                           .FirstOrDefault(c => c.CellReference == cellRef);
+
+      string val = GetCellValue(doc, cell);
+      if (!string.IsNullOrWhiteSpace(val)) {
+        females.Add(val);
+        _femaleStudentCount++;
       }
     }
 
-    return values;
+    Debug.WriteLine("MaleCount: " + _maleStudentCount + "FemaleCount: " + _femaleStudentCount);
+    return (males, females);
   }
   
   public List<string> AppendAndSortNames(string newValue, bool male = true) {
     string columnLetter = "B";
-    uint startRow = male ? _maleStudentStartRow : _femaleStudentStartRow;
-    uint endRow = male ? 37u : 88u;
+    uint startRow = male ? _maleNamesStartRow : _femaleNamesStartRow;
+    uint endRow = male ? _maleNamesStartRow + _maleStudentCount : _femaleNamesStartRow + _femaleStudentCount;
 
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;
@@ -471,7 +510,8 @@ public class WorkbookService : IDisposable {
       wsPart.Worksheet.Save();
       wbPart.Workbook.Save();
 
-      return ReadNames(doc, male);
+      var (males, females) = ReadNames(doc);
+      return male ? males : females;
     }
   }
 
