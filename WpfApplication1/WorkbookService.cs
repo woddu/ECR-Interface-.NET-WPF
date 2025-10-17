@@ -367,7 +367,7 @@ public class WorkbookService : IDisposable {
 
     foreach (Row row in sheetData.Elements<Row>()) {
       // Build the cell reference for column B
-      string cellRef = $"B{row.RowIndex}";
+      string cellRef = $"A{row.RowIndex}";
       Cell cell = row.Elements<Cell>()
                      .FirstOrDefault(c => c.CellReference == cellRef);
 
@@ -380,6 +380,9 @@ public class WorkbookService : IDisposable {
         _femaleNamesStartRow = row.RowIndex + 1;
       }
     }
+
+    Debug.WriteLine("malenames start row " + _maleNamesStartRow);
+    Debug.WriteLine("femalenames start row " + _femaleNamesStartRow);
 
     var maleEndRow = _femaleNamesStartRow - 2;
     var femaleEndRow = _femaleNamesStartRow + 70;

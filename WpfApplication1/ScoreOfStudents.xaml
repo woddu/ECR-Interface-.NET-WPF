@@ -82,7 +82,7 @@
                 <TextBlock Text="Female Students" 
                            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
                            FontWeight="Black"
-                           Margin="5,10,5,5"/>
+                           Margin="5,15,5,5"/>
                 <ItemsControl ItemsSource="{Binding FemaleStudentsView}"
 >
                     <ItemsControl.ItemTemplate>
