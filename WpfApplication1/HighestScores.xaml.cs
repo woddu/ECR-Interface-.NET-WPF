@@ -24,6 +24,7 @@ namespace WpfApplication1 {
       get { return _exam; }
       set {
         txtExam.Text = _exam = value;
+        btnExamItem.IsEnabled = !string.IsNullOrWhiteSpace(_exam) || int.Parse(_exam) > 0;
       }
     }
 
@@ -31,7 +32,7 @@ namespace WpfApplication1 {
     public EventHandler SaveExamClicked;
     public EventHandler SaveWrittenWorksClicked;
     public EventHandler SavePerformanceTasksClicked;
-    public Action<uint, bool, int> HighestScoreItemClicked;
+    public Action<uint, ScoreType, int> HighestScoreItemClicked;
     public HighestScores() {
       InitializeComponent();
       DataContext = this;
@@ -39,13 +40,18 @@ namespace WpfApplication1 {
 
     private void WrittenWorks_ItemCliked(object sender, System.Windows.RoutedEventArgs e) {
       if (sender is Button btn) {
-        HighestScoreItemClicked?.Invoke(uint.Parse(btn.Tag.ToString()), true, int.Parse(WrittenWorks[int.Parse(btn.Tag.ToString())]));
+        HighestScoreItemClicked?.Invoke(uint.Parse(btn.Tag.ToString()), ScoreType.WrittenWorks, int.Parse(WrittenWorks[int.Parse(btn.Tag.ToString())]));
       }
     }
     private void PerformanceTasks_ItemCliked(object sender, System.Windows.RoutedEventArgs e) {
       if (sender is Button btn) {
 
-        HighestScoreItemClicked?.Invoke(uint.Parse(btn.Tag.ToString()), false, int.Parse(PerformanceTasks[int.Parse(btn.Tag.ToString())]));
+        HighestScoreItemClicked?.Invoke(uint.Parse(btn.Tag.ToString()), ScoreType.PerformanceTasks, int.Parse(PerformanceTasks[int.Parse(btn.Tag.ToString())]));
+      }
+    }
+    private void Exam_ItemCliked(object sender, System.Windows.RoutedEventArgs e) {
+      if (sender is Button btn) {
+        HighestScoreItemClicked?.Invoke(0u, ScoreType.Exam, int.Parse(Exam));
       }
     }
 
@@ -147,4 +153,5 @@ namespace WpfApplication1 {
       return null;
     }
   }
+
 }
