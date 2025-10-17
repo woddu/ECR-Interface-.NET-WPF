@@ -1,12 +1,7 @@
-﻿
-using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.Spreadsheet;
-using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,7 +35,7 @@ namespace WpfApplication1 {
       highestScoresPage.SaveExamClicked += HighestScores_SaveExamClicked;
       highestScoresPage.SaveWrittenWorksClicked += HighestScores_SaveWrittenWorksClicked;
       highestScoresPage.SavePerformanceTasksClicked += HighestScores_SavePerformanceTasksClicked;
-      highestScoresPage.HighestScoreItemClicked += HighestScores_HighestScoreItemClicked;
+      highestScoresPage.HighestScoreItemClicked += HighestScores_HighestScoreItemClicked;      
 
       studentDetails.SaveExamClicked += StudentDetails_SaveExamClicked;
       studentDetails.SaveWrittenWorksClicked += StudentDetails_SaveWrittenWorksClicked;
@@ -57,9 +52,9 @@ namespace WpfApplication1 {
             scoreOfStudents.ColumnIndex,
             scoreOfStudents.MaleStudentsWithScores.Select(s => s.Score).ToList(),
             scoreOfStudents.FemaleStudentsWithScores.Select(s => s.Score).ToList(),
-            scoreOfStudents.Type == "Written Works"
+            scoreOfStudents.Type
             );
-          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(scoreOfStudents.ColumnIndex, scoreOfStudents.Type == "Written Works");
+          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(scoreOfStudents.ColumnIndex, ScoreType.WrittenWorks);
           return (maleStudentsWS, femaleStudentsWS);
         });
 
@@ -76,11 +71,6 @@ namespace WpfApplication1 {
 
         scoreOfStudents.MaleStudentsWithScores.Clear();
         scoreOfStudents.FemaleStudentsWithScores.Clear();
-
-        if (scoreOfStudents.Type == "Written Works")
-          scoreOfStudents.Type = "Written Works";
-        else
-          scoreOfStudents.Type = "Performance Tasks";
 
         scoreOfStudents.HighestScore = scoreOfStudents.HighestScore;
 
@@ -107,11 +97,11 @@ namespace WpfApplication1 {
       }
     }
 
-    private async void HighestScores_HighestScoreItemClicked(uint index, bool isWrittenWork, int highestScore) {
+    private async void HighestScores_HighestScoreItemClicked(uint index, ScoreType scoreType, int highestScore) {
       try {
         SetLoading(true);
         (List<string> maleStudents, List<string> femaleStudents) = await Task.Run(() => {
-          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(index, isWrittenWork);
+          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(index, scoreType);
           return (maleStudentsWS, femaleStudentsWS);
         });
 
@@ -129,11 +119,8 @@ namespace WpfApplication1 {
         scoreOfStudents.MaleStudentsWithScores.Clear();
         scoreOfStudents.FemaleStudentsWithScores.Clear();
 
-        if (isWrittenWork)
-          scoreOfStudents.Type = "Written Works";
-        else
-          scoreOfStudents.Type = "Performance Tasks";
-
+        scoreOfStudents.Type = scoreType;
+        
         scoreOfStudents.HighestScore = highestScore;
 
         scoreOfStudents.ColumnIndex = index;
@@ -509,6 +496,7 @@ namespace WpfApplication1 {
       ErrorTitle.Text = title;
       ErrorDescription.Text = error;
       RootDialog.IsOpen = true;
+      SetLoading(false);
     }
 
     private void SetLoading(bool isLoading) {
