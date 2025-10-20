@@ -24,7 +24,7 @@ namespace WpfApplication1 {
       get { return _exam; }
       set {
         txtExam.Text = _exam = value;
-        btnExamItem.IsEnabled = !string.IsNullOrWhiteSpace(_exam) || int.Parse(_exam) > 0;
+        btnExamItem.IsEnabled = int.TryParse(_exam, out int _out) && _out > 0;
       }
     }
 

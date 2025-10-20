@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -149,7 +148,6 @@ namespace WpfApplication1 {
         if (WorkbookService.tracks[index] != _workbookService.Track) {
           SetLoading(true);
           await Task.Run(() => {
-            Debug.WriteLine("Track: " + WorkbookService.tracks[index]);
             _workbookService.ChangeTrack(index);
           });
           highestScoresPage.SetWrittenWorksPercentage((_workbookService.WeightedScores[0] * 100) + "%");
@@ -181,8 +179,6 @@ namespace WpfApplication1 {
           highestScoresPage.PerformanceTasks.Clear();
 
           _workbookService.PerformanceTasks.ForEach(score => highestScoresPage.PerformanceTasks.Add(score));
-
-
 
           homePage.ChangeQuarter(_workbookService.Quarter1);
         } catch (Exception ex) {

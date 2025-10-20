@@ -3,7 +3,6 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -256,7 +255,6 @@ public class WorkbookService : IDisposable {
       }
     }
 
-    Debug.WriteLine("Start: " + _femaleScoresStartRow + " Count: " + _femaleStudentCount + " End :" + (_femaleScoresStartRow + _femaleStudentCount));
     foreach (Row row in sheetData.Elements<Row>()) {
       if (row.RowIndex >= _femaleScoresStartRow && row.RowIndex < (_femaleScoresStartRow + _femaleStudentCount)) {
         Cell cell = row.Elements<Cell>()
@@ -336,13 +334,6 @@ public class WorkbookService : IDisposable {
       }
     }
 
-    if (_maleStudentCount == 0u || _femaleStudentCount == 0u) {
-
-
-    }
-
-    Debug.WriteLine("femalescores start row" + _femaleScoresStartRow);
-
     var (maleNames, femaleNames) = ReadNames(doc);
     ReadHighestPossibleScores(doc);    
 
@@ -381,9 +372,6 @@ public class WorkbookService : IDisposable {
       }
     }
 
-    Debug.WriteLine("malenames start row " + _maleNamesStartRow);
-    Debug.WriteLine("femalenames start row " + _femaleNamesStartRow);
-
     var maleEndRow = _femaleNamesStartRow - 2;
     var femaleEndRow = _femaleNamesStartRow + 70;
     _maleStudentCount = 0u;
@@ -410,8 +398,7 @@ public class WorkbookService : IDisposable {
         _femaleStudentCount++;
       }
     }
-
-    Debug.WriteLine("MaleCount: " + _maleStudentCount + "FemaleCount: " + _femaleStudentCount);
+    
     return (males, females);
   }
   
