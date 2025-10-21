@@ -27,8 +27,7 @@ namespace WpfApplication1 {
     public EventHandler SaveScores;
 
     private ScoreType _type;
-    public ScoreType Type 
-    {
+    public ScoreType Type {
       get { return _type; }
       set {
         _type = value;
@@ -42,30 +41,69 @@ namespace WpfApplication1 {
     }
 
     private int _highestScore;
-    public int HighestScore 
-    { 
+    public int HighestScore {
       get { return _highestScore; }
       set { tbHighestScore.Text = "Highest Score: " + (_highestScore = value).ToString(); }
     }
 
     private uint _columnIndex;
-    public uint ColumnIndex { 
+    public uint ColumnIndex {
       get { return _columnIndex; }
       set {
         _columnIndex = value;
         tbType.Text = tbType.Text + " #" + (_columnIndex + 1).ToString(); }
-      }
+    }
 
+    private bool _suppressLostFocus;
     public ScoreOfStudents() {
       InitializeComponent();
       DataContext = this;
 
       MaleStudentsView = CollectionViewSource.GetDefaultView(MaleStudentsWithScores);
       FemaleStudentsView = CollectionViewSource.GetDefaultView(FemaleStudentsWithScores);
+      btnClear.Visibility = Visibility.Collapsed;
+    }
+
+    private void MaleStudentScore_LostFocus(object sender, RoutedEventArgs e) {
+      if (_suppressLostFocus) {
+        _suppressLostFocus = false;
+        return;
+      }
+      SaveFromTextBox(sender, true);
+    }
+
+    private void MaleStudentScore_PreviewKeyDown(object sender, KeyEventArgs e) {
+      if (e.Key == Key.Enter) {
+        _suppressLostFocus = true;
+        SaveFromTextBox(sender, true);
+        e.Handled = true;
+      }
+    }
+
+    private void FemaleStudentScore_LostFocus(object sender, RoutedEventArgs e) {
+      if (_suppressLostFocus) {
+        _suppressLostFocus = false;
+        return;
+      }
+      SaveFromTextBox(sender, false);
+    }
+
+    private void FemaleStudentScore_PreviewKeyDown(object sender, KeyEventArgs e) {
+      if (e.Key == Key.Enter) {
+        _suppressLostFocus = true;
+        SaveFromTextBox(sender, false);
+        e.Handled = true;
+      }
     }
 
     private void SaveScores_Click(object sender, RoutedEventArgs e) =>
       SaveScores?.Invoke(this, EventArgs.Empty);
+
+    private void ClearSearch_Click(object sender, RoutedEventArgs e) {
+      searchBox.Text = string.Empty;
+      searchBox.Focus();
+      btnClear.Visibility = Visibility.Collapsed;
+    }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) {
       var text = (sender as TextBox)?.Text ?? string.Empty;
@@ -73,11 +111,13 @@ namespace WpfApplication1 {
       if (string.IsNullOrWhiteSpace(text)) {
         MaleStudentsView.Filter = null;
         FemaleStudentsView.Filter = null;
+        btnClear.Visibility = Visibility.Collapsed;
       } else {
         MaleStudentsView.Filter = o => ((StudentWithScore)o).Name
             .Contains(text, StringComparison.OrdinalIgnoreCase);
         FemaleStudentsView.Filter = o => ((StudentWithScore)o).Name
             .Contains(text, StringComparison.OrdinalIgnoreCase);
+        btnClear.Visibility = Visibility.Visible;
       }
 
       MaleStudentsView.Refresh();
@@ -101,6 +141,25 @@ namespace WpfApplication1 {
       btnSaveScores.IsEnabled = (newValue != oldValue);
     }
 
+    private void SaveFromTextBox(object sender, bool isMale = true) {
+      var tb = (TextBox)sender;
+      int index = (int)tb.Tag; // index in the collection
+
+      string newValue = tb.Text;
+      string oldValue;
+      if (isMale) {
+        oldValue = InitialMaleStudentsScores[index];
+      } else {
+        oldValue = InitialFemaleStudentsScores[index];
+      }
+      if (!string.IsNullOrWhiteSpace(newValue) && (newValue != oldValue)) {
+        SaveScores?.Invoke(this, EventArgs.Empty);
+        searchBox.Focus();
+      }
+    }
+    public void ResetSaveButton() {
+      btnSaveScores.IsEnabled = false;
+    }
     private void LettersOnlyTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
       e.Handled = !e.Text.All(c => char.IsLetter(c) || c == ',' || c == ' ' || c == '.');
     }
