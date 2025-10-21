@@ -18,20 +18,31 @@
             HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
                 <!-- Search bar -->
-                <DockPanel Margin="0,0,0,10">
+                <DockPanel Margin="0,0,0,10"
+                    >
                     <Image Source="/icons/search_26dp.png"
                         Width="20" Height="20"
                         Margin="4"
                         DockPanel.Dock="Left" />
-                    <TextBox
-                        x:Name="searchBox"
-                        TextChanged="SearchBox_TextChanged"                  
+
+                    <Image Source="/icons/close_26dp.png"
+                        x:Name="btnClear"
+                        Width="20" Height="20"
+                        Margin="4"
+                        MouseLeftButtonUp="ClearSearch_Click"
+                        Cursor="Hand"
+                        DockPanel.Dock="Right" />
+                        
+                    <TextBox x:Name="searchBox"
+                        TextChanged="SearchBox_TextChanged"
                         materialDesign:HintAssist.Hint="Search Student"
-                        AcceptsReturn="True"                 
+                        AcceptsReturn="True"
                         Style="{StaticResource MaterialDesignFilledTextBox}"
                         VerticalAlignment="Center"
-                        Width="Auto" 
+                        HorizontalAlignment="Stretch"
                         PreviewTextInput="LettersOnlyTextBox_PreviewTextInput"/>
+
+                    
                 </DockPanel>
 
                 <!-- Male students -->
@@ -58,7 +69,7 @@
                                     Margin="0,0,8,0"/>
 
                                 <!-- Second column: Score -->
-                                    <TextBox Grid.Column="1"
+                                <TextBox Grid.Column="1"
                                     Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
                                     materialDesign:HintAssist.Hint="Score"
                                     AcceptsReturn="True"                 
@@ -69,6 +80,8 @@
                                     MaxLength="2"
                                     materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"                                        
                                     TextChanged="MaleStudentScoreTextChanged"
+                                    LostFocus="MaleStudentScore_LostFocus"
+                                    PreviewKeyDown="MaleStudentScore_PreviewKeyDown"
                                     Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
                                     Path=(ItemsControl.AlternationIndex)}"/>
                                 </Grid>
@@ -98,23 +111,25 @@
 
                                     <!-- First column: Name -->
                                     <TextBlock Text="{Binding Name}"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,8,0"/>
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"/>
 
                                     <!-- Second column: Score -->
                                     <TextBox Grid.Column="1"
-                                    Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
-                                    materialDesign:HintAssist.Hint="Score"
-                                    AcceptsReturn="True"                 
-                                    Style="{StaticResource MaterialDesignFilledTextBox}"
-                                    TextWrapping="Wrap"
-                                    Width="70"
-                                    PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
-                                    MaxLength="2"
-                                    materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"                                        
-                                    TextChanged="MaleStudentScoreTextChanged"
-                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
-                                    Path=(ItemsControl.AlternationIndex)}"/>
+                                        Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}" 
+                                        materialDesign:HintAssist.Hint="Score"
+                                        AcceptsReturn="True"                 
+                                        Style="{StaticResource MaterialDesignFilledTextBox}"
+                                        TextWrapping="Wrap"
+                                        Width="70"
+                                        PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
+                                        MaxLength="2"
+                                        materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"                                        
+                                        TextChanged="MaleStudentScoreTextChanged"
+                                        LostFocus="FemaleStudentScore_LostFocus"
+                                        PreviewKeyDown="FemaleStudentScore_PreviewKeyDown"
+                                        Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 
+                                        Path=(ItemsControl.AlternationIndex)}"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
