@@ -70,25 +70,23 @@ namespace WpfApplication1 {
 
         scoreOfStudents.MaleStudentsWithScores.Clear();
         scoreOfStudents.FemaleStudentsWithScores.Clear();
-
-        scoreOfStudents.HighestScore = scoreOfStudents.HighestScore;
-
-        scoreOfStudents.ColumnIndex = scoreOfStudents.ColumnIndex;
-
+        scoreOfStudents.InitialMaleStudentsScores.Clear();
+        scoreOfStudents.InitialFemaleStudentsScores.Clear();
         maleStudentWithScores.ForEach(s => {
           scoreOfStudents.MaleStudentsWithScores.Add(s);
           scoreOfStudents.InitialMaleStudentsScores.Add(s.Score);
         });
+
         femaleStudentWithScores.ForEach(s => {
           scoreOfStudents.FemaleStudentsWithScores.Add(s);
           scoreOfStudents.InitialFemaleStudentsScores.Add(s.Score);
         });
 
+        scoreOfStudents.ResetSaveButton();
+
         MainContent.Content = scoreOfStudents;
 
         rbtnScores.IsChecked = false;
-
-        SetLoading(false);
 
         SetLoading(false);
       } catch (Exception ex) {
