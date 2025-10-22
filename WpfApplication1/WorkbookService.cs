@@ -721,8 +721,12 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  public void EditStudentScore(List<string> scores, uint studentRow, bool isWrittenWork = true) {
-
+  public void EditStudentScore(List<string> scores, uint studentRow, bool isMale, bool isWrittenWork = true) {
+    if (isMale) {
+      studentRow += _maleScoresStartRow;
+    } else {
+      studentRow += _femaleScoresStartRow;
+    }
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;
       Sheet sheet = wbPart.Workbook.Sheets
@@ -788,7 +792,12 @@ public class WorkbookService : IDisposable {
     }
   }
 
-  public void EditStudentExam(string newValue, uint row) {
+  public void EditStudentExam(string newValue, uint row, bool isMale) {
+    if (isMale) {
+      row += _maleScoresStartRow;
+    } else {
+      row += _femaleScoresStartRow;
+    }
     string cellRef = $"AF{row}";
     using (SpreadsheetDocument doc = SpreadsheetDocument.Open(FilePath, true)) {
       WorkbookPart wbPart = doc.WorkbookPart;

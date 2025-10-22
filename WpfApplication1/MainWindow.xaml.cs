@@ -191,10 +191,11 @@ namespace WpfApplication1 {
         (string exam, string grade, int transmutedGrade) = await Task.Run(() => {
           _workbookService.EditStudentExam(
             studentDetails.Exam,
-            studentDetails.StudentRow
+            studentDetails.StudentIndex,
+            studentDetails.IsMale
             );
           var (writtenWorks, performanceTasks, exam, grade) =
-            _workbookService.ReadStudentScores(studentDetails.StudentRow, studentDetails.IsMale);
+            _workbookService.ReadStudentScores(studentDetails.StudentIndex, studentDetails.IsMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (exam, grade, transmuted);
         });
@@ -213,11 +214,13 @@ namespace WpfApplication1 {
         (List<string> writtenWorksScores, string grade, int transmutedGrade) = await Task.Run(() => {
           _workbookService.EditStudentScore(
             studentDetails.WrittenWorks.Select(p => p.Value).ToList(),
-            studentDetails.StudentRow
+            studentDetails.StudentIndex,
+            studentDetails.IsMale,
+            true
             );
 
           var (writtenWorks, performanceTasks, exam, grade) =
-            _workbookService.ReadStudentScores(studentDetails.StudentRow, studentDetails.IsMale);
+            _workbookService.ReadStudentScores(studentDetails.StudentIndex, studentDetails.IsMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (writtenWorks, grade, transmuted);
         });
@@ -245,12 +248,13 @@ namespace WpfApplication1 {
         (List<string> performanceTasksScores, string grade, int transmutedGrade) = await Task.Run(() => {
           _workbookService.EditStudentScore(
             studentDetails.PerformanceTasks.Select(p => p.Value).ToList(),
-            studentDetails.StudentRow,
+            studentDetails.StudentIndex,
+            studentDetails.IsMale,
             false
             );
 
           var (writtenWorks, performanceTasks, exam, grade) =
-            _workbookService.ReadStudentScores(studentDetails.StudentRow, studentDetails.IsMale);
+            _workbookService.ReadStudentScores(studentDetails.StudentIndex, studentDetails.IsMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (performanceTasks, grade, transmuted);
         });
@@ -316,7 +320,7 @@ namespace WpfApplication1 {
       }
     }
 
-    private async void StudentsPage_NameClicked(uint row, string name, bool isMale) {
+    private async void StudentsPage_NameClicked(uint index, string name, bool isMale) {
       try {
         SetLoading(true);
         studentDetails.OriginalWrittenWork.Clear();
@@ -324,12 +328,12 @@ namespace WpfApplication1 {
         studentDetails.WrittenWorks.Clear();
         studentDetails.PerformanceTasks.Clear();
         (List<string> writtenWorks, List<string> performanceTasks, string exam, string grade, int transmutedGrade) = await Task.Run(() => {
-          var (writtenWorks, performanceTasks, exam, grade) = _workbookService.ReadStudentScores(row, isMale);
+          var (writtenWorks, performanceTasks, exam, grade) = _workbookService.ReadStudentScores(index, isMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (writtenWorks, performanceTasks, exam, grade, transmuted);
         });
 
-        studentDetails.StudentRow = row;
+        studentDetails.StudentIndex = index;
         studentDetails.StudentName = name;
         studentDetails.IsMale = isMale;
         studentDetails.Exam = exam;

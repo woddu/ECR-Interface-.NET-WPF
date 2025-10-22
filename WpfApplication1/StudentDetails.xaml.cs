@@ -42,7 +42,7 @@ namespace WpfApplication1 {
       }
     }
 
-    public uint StudentRow { get; set; }
+    public uint StudentIndex { get; set; }
 
     public bool IsMale { get; set; }
 
