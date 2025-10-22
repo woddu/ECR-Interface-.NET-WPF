@@ -44,6 +44,8 @@ namespace WpfApplication1 {
 
     public uint StudentRow { get; set; }
 
+    public bool IsMale { get; set; }
+
     public EventHandler SaveExamClicked;
     public EventHandler SaveWrittenWorksClicked;
     public EventHandler SavePerformanceTasksClicked;

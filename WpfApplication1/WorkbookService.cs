@@ -571,9 +571,13 @@ public class WorkbookService : IDisposable {
   }
 
   public (List<string> writtenWorks, List<string> performanceTasks, string exam, string grade) ReadStudentScores(
-    uint row
+    uint row, bool isMale
   ) {
-
+    if (isMale) {
+      row += _maleScoresStartRow;
+    } else {
+      row += _femaleScoresStartRow;
+    }
     var values1 = new List<string>();
     var values2 = new List<string>();
     string examVal = "";

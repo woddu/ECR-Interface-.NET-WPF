@@ -194,7 +194,7 @@ namespace WpfApplication1 {
             studentDetails.StudentRow
             );
           var (writtenWorks, performanceTasks, exam, grade) =
-            _workbookService.ReadStudentScores(studentDetails.StudentRow);
+            _workbookService.ReadStudentScores(studentDetails.StudentRow, studentDetails.IsMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (exam, grade, transmuted);
         });
@@ -217,7 +217,7 @@ namespace WpfApplication1 {
             );
 
           var (writtenWorks, performanceTasks, exam, grade) =
-            _workbookService.ReadStudentScores(studentDetails.StudentRow);
+            _workbookService.ReadStudentScores(studentDetails.StudentRow, studentDetails.IsMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (writtenWorks, grade, transmuted);
         });
@@ -250,7 +250,7 @@ namespace WpfApplication1 {
             );
 
           var (writtenWorks, performanceTasks, exam, grade) =
-            _workbookService.ReadStudentScores(studentDetails.StudentRow);
+            _workbookService.ReadStudentScores(studentDetails.StudentRow, studentDetails.IsMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (performanceTasks, grade, transmuted);
         });
@@ -316,7 +316,7 @@ namespace WpfApplication1 {
       }
     }
 
-    private async void StudentsPage_NameClicked(object sender, (uint row, string name) tuple) {
+    private async void StudentsPage_NameClicked(uint row, string name, bool isMale) {
       try {
         SetLoading(true);
         studentDetails.OriginalWrittenWork.Clear();
@@ -324,13 +324,14 @@ namespace WpfApplication1 {
         studentDetails.WrittenWorks.Clear();
         studentDetails.PerformanceTasks.Clear();
         (List<string> writtenWorks, List<string> performanceTasks, string exam, string grade, int transmutedGrade) = await Task.Run(() => {
-          var (writtenWorks, performanceTasks, exam, grade) = _workbookService.ReadStudentScores(tuple.row);
+          var (writtenWorks, performanceTasks, exam, grade) = _workbookService.ReadStudentScores(row, isMale);
           var transmuted = _workbookService.GetComputedGrade(writtenWorks, performanceTasks, exam);
           return (writtenWorks, performanceTasks, exam, grade, transmuted);
         });
 
-        studentDetails.StudentRow = tuple.row;
-        studentDetails.StudentName = tuple.name;
+        studentDetails.StudentRow = row;
+        studentDetails.StudentName = name;
+        studentDetails.IsMale = isMale;
         studentDetails.Exam = exam;
         studentDetails.SetGrade(transmutedGrade.ToString());
         for (int i = 0; i < _workbookService.WrittenWorks.Count; i++) {

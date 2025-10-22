@@ -12,7 +12,7 @@ namespace WpfApplication1 {
   public partial class SamplePage : UserControl {
     public event EventHandler<string> AddMale;
     public event EventHandler<string> AddFemale;
-    public event EventHandler<(uint row, string name)> NameClicked;
+    public event Action<uint, string, bool> NameClicked;
 
     private System.ComponentModel.ICollectionView _collectionViewMale;
     private System.ComponentModel.ICollectionView _collectionViewFemale;
@@ -72,16 +72,16 @@ namespace WpfApplication1 {
 
     private void listMale_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (listMale.SelectedItem != null) {
-        int rowInExcel = MaleNames.IndexOf(listMale.SelectedItem.ToString()) + 13;
-        NameClicked?.Invoke(this, ((uint)rowInExcel, listMale.SelectedItem.ToString()));
+        int index = MaleNames.IndexOf(listMale.SelectedItem.ToString());
+        NameClicked?.Invoke((uint)index, listMale.SelectedItem.ToString(), true);
         listMale.SelectedIndex = -1;
       }
     }
 
     private void listFemale_SelectionChanged(object sender, SelectionChangedEventArgs e) {
       if (listFemale.SelectedItem != null) {
-        int rowInExcel = FemaleNames.IndexOf(listFemale.SelectedItem.ToString()) + 69;
-        NameClicked?.Invoke(this, ((uint)rowInExcel, listFemale.SelectedItem.ToString()));
+        int index = FemaleNames.IndexOf(listFemale.SelectedItem.ToString());
+        NameClicked?.Invoke((uint)index, listFemale.SelectedItem.ToString(), false);
         listFemale.SelectedIndex = -1;
       }
     }
