@@ -97,7 +97,7 @@
                            FontWeight="Black"
                            Margin="5,15,5,5"/>
                 <ItemsControl ItemsSource="{Binding FemaleStudentsView}"
->
+                    AlternationCount="1000">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" >
@@ -125,7 +125,7 @@
                                         PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"
                                         MaxLength="2"
                                         materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"                                        
-                                        TextChanged="MaleStudentScoreTextChanged"
+                                        TextChanged="FemaleStudentScoreTextChanged"
                                         LostFocus="FemaleStudentScore_LostFocus"
                                         PreviewKeyDown="FemaleStudentScore_PreviewKeyDown"
                                         Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContentPresenter}, 

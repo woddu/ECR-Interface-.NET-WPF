@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -152,6 +153,7 @@ namespace WpfApplication1 {
       } else {
         oldValue = InitialFemaleStudentsScores[index];
       }
+      Debug.WriteLine($"Index: {index}, New Value: {newValue}, Old Value: {oldValue}");
       if (!string.IsNullOrWhiteSpace(newValue) && (newValue != oldValue)) {
         SaveScores?.Invoke(this, EventArgs.Empty);
         searchBox.Focus();
