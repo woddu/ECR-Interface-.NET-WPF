@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -53,7 +54,7 @@ namespace WpfApplication1 {
             scoreOfStudents.FemaleStudentsWithScores.Select(s => s.Score).ToList(),
             scoreOfStudents.Type
             );
-          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(scoreOfStudents.ColumnIndex, ScoreType.WrittenWorks);
+          (List<string> maleStudentsWS, List<string> femaleStudentsWS) = _workbookService.GetScoresOfItem(scoreOfStudents.ColumnIndex, scoreOfStudents.Type);
           return (maleStudentsWS, femaleStudentsWS);
         });
 
@@ -115,7 +116,8 @@ namespace WpfApplication1 {
 
         scoreOfStudents.MaleStudentsWithScores.Clear();
         scoreOfStudents.FemaleStudentsWithScores.Clear();
-
+        scoreOfStudents.InitialMaleStudentsScores.Clear();
+        scoreOfStudents.InitialFemaleStudentsScores.Clear();
         scoreOfStudents.Type = scoreType;
         
         scoreOfStudents.HighestScore = highestScore;
@@ -126,10 +128,13 @@ namespace WpfApplication1 {
           scoreOfStudents.MaleStudentsWithScores.Add(s);
           scoreOfStudents.InitialMaleStudentsScores.Add(s.Score);
         });
+
         femaleStudentWithScores.ForEach(s => {
           scoreOfStudents.FemaleStudentsWithScores.Add(s);
           scoreOfStudents.InitialFemaleStudentsScores.Add(s.Score);
         });
+
+        Debug.WriteLine(string.Join(", ", scoreOfStudents.InitialFemaleStudentsScores));
 
         MainContent.Content = scoreOfStudents;
 
@@ -349,13 +354,11 @@ namespace WpfApplication1 {
         }
 
         for (int i = 0; i < _workbookService.PerformanceTasks.Count; i++) {
-
           studentDetails.PerformanceTasks.Add(new FieldDefinition {
             Label = _workbookService.PerformanceTasks[i],
             Value = performanceTasks[i]
           });
           studentDetails.OriginalPerformanceTask.Add(performanceTasks[i]);
-
         }
         rbtnStudents.IsChecked = false;
         MainContent.Content = studentDetails;
@@ -376,7 +379,6 @@ namespace WpfApplication1 {
       } else if (rb.Name == rbtnScores.Name) {
         MainContent.Content = highestScoresPage;
       }
-
     }
 
     private void StudentsPage_CLiked(object sender, EventArgs e) {
@@ -392,12 +394,7 @@ namespace WpfApplication1 {
           _workbookService.LoadWorkbook(file[0]);
 
           if (!_workbookService.IsFileECR()) {
-            return (
-              false,
-              "",
-              [],
-              []
-            );
+            return (false, "", [], []);
           }
 
           var (maleNames, femaleNames) = _workbookService.ReadAllNames();
